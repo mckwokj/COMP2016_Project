@@ -695,12 +695,11 @@ public class OnlineBookShop {
 
     }
 
-    private void updateDeliver(String order_no, String Bnum) {
+    private void updateDeliver(String order_no, String Bnum, String date) {
         try {
             Statement stm = conn.createStatement();
             String sql = "INSERT INTO DELIVER VALUES(" + "'" + order_no + "', " +
-                    "'" + Bnum.toUpperCase() + "', " +
-                    "null)" ;
+                    "'" + Bnum.toUpperCase() + "', TO_DATE('" + date + "', 'DD/MM/YYYY'))" ;
             //System.out.println(sql);
             stm.executeUpdate(sql);
             stm.close();
