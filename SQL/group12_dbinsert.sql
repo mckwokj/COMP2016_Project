@@ -24,7 +24,7 @@ CREATE TABLE Place_Order(
 
 -- INSERT INTO Place_Order VALUES('ORD_000001', 12345678, TO_DATE('15/04/2020:15:20:08','dd/mm/yyyy:hh24/mi/ss'), 'Harry Potter I', 300, 'CASH', NULL);
 -- INSERT INTO Place_Order VALUES('ORD_000002', 23456789, TO_DATE('15/04/2020:14:20:00','dd/mm/yyyy:hh24/mi/ss'), 'Harry Potter II', 300, 'CASH', NULL);
--- INSERT INTO Place_Order VALUES('ORD_000003', 12345128, TO_DATE('15/04/2020:15:20:08','dd/mm/yyyy:hh24/mi/ss'), 'Harry Potter III', 400, 'CARD', '1234-5678-1234-5678');
+-- INSERT INTO Place_Order VALUES('ORD_000003', 12345128, TO_DATE('15/04/2020:15:20:08','dd/mm/yyyy:hh24/mi/ss'), 'Harry Potter III', 400, 'CARD', '1234-5678-1234-5678');  *** integrity constraint violated
 
 CREATE TABLE Book(
 	bnum CHAR(10),
@@ -47,7 +47,7 @@ CREATE TABLE Deliver(
 	FOREIGN KEY (bnum) REFERENCES Book);
 
 -- INSERT INTO Deliver VALUES('ORD_000001', 'BOOK_00001', NULL);
--- INSERT INTO Deliver VALUES('ORD_000003', 'BOOK_00003', NULL);
+-- INSERT INTO Deliver VALUES('ORD_000003', 'BOOK_00003', NULL); *** integrity constraint violated
 
 
 
