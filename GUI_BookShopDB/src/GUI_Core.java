@@ -11,23 +11,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.*;
 
-public class GUI {
+public class GUI_Core {
 
     /**
      * @param args the command line arguments
      */
 
     public JFrame majorFrame;
-    private JTextField orderSearchingTextField, orderMakingTextField, orderCancelingTextField;
-    private JList imageTempList, availableBooksList, bookingRecordsList;
-    private JTextArea consoleBoxTextArea;
-    private JScrollPane imageTempScrollPane, availableBooksScrollPane, bookingRecordsScrollPane, consoleBoxScrollPane;
-    private JLabel availableBooksLabel, bookingRecordsLabel, orderSearchingLabel, orderMakingLabel, orderCancelingLabel, consoleBoxLabel;
-    private JButton orderSearchingButton, orderMakingButton, orderCancelingButton;
+    private JTextField  orderSearchingTextField, /** order searching**/
+                        orderNumUpdatingTextField, bookNumUpdatingTextField, dateUpdatingTextField, /** order updating **/
+                        stdOrderMakingTextField, bookNumOrderMakingTextField, paymentCardNumTextField, /** order making **/
+                        orderCancelingTextField; /** order cancelling **/
+    private JList imageTempList, bookingRecordsList;
+    private JTextArea consoleBoxTextArea, allBooksTextArea;
+    private JScrollPane imageTempScrollPane, allBooksScrollPane, imageScrollPane, consoleBoxScrollPane;
+    private JLabel allBooksLabel, bookingRecordsLabel, orderSearchingLabel, orderMakingLabel, orderCancelingLabel, consoleBoxLabel;
+    private JButton orderSearchingButton, dateUpdatingButton, orderMakingButton, orderCancelingButton, allBooksDisplayButton;
+    private JRadioButton paymentRdBtnCash, paymentRdBtnCard, paymentRdBtnTransfer;
+    private ButtonGroup paymentBtGroup;
 
     public bookshop managerDB;
 
-    public GUI() {}
+    public GUI_Core() {}
 
     private void initialize()
     {
@@ -39,7 +44,7 @@ public class GUI {
          ***************************/
         majorFrame = new JFrame();
         majorFrame.setTitle("Testing");
-        majorFrame.setBounds(100, 100, 751, 400);
+        majorFrame.setBounds(100, 100, 751, 500);
         majorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         majorFrame.getContentPane().setLayout(null);
 
@@ -49,10 +54,10 @@ public class GUI {
         /**************************
          ******   Labels     *******
          ***************************/
-        availableBooksLabel = new JLabel("Available Books: ");
-        availableBooksLabel.setFont(myFt);
-        availableBooksLabel.setBounds(10, 10, 151, 19);    /***209, 16, 101, 15 ***/
-        majorFrame.getContentPane().add(availableBooksLabel);
+        allBooksLabel = new JLabel("Available Books: ");
+        allBooksLabel.setFont(myFt);
+        allBooksLabel.setBounds(10, 10, 151, 19);    /***209, 16, 101, 15 ***/
+        majorFrame.getContentPane().add(allBooksLabel);
 
 //        bookingRecordsLabel = new JLabel("Console Box (Booking Records): ");
 //        bookingRecordsLabel.setFont(myFt);
@@ -61,12 +66,12 @@ public class GUI {
 
         consoleBoxLabel = new JLabel("Console Box: ");
         consoleBoxLabel.setFont(myFt);
-        consoleBoxLabel.setBounds(10, 190, 171, 19);    /***209, 16, 101, 15 ***/
+        consoleBoxLabel.setBounds(10, 190, 151, 19);    /***209, 16, 101, 15 ***/
         majorFrame.getContentPane().add(consoleBoxLabel);
 
-        orderSearchingLabel = new JLabel("Order Searching/Updating: ");
+        orderSearchingLabel = new JLabel("Order Searching/Updating (dd/mm/yyyy): ");
         orderSearchingLabel.setFont(myFt);
-        orderSearchingLabel.setBounds(330, 215, 210, 19);    /***209, 16, 101, 15 ***/
+        orderSearchingLabel.setBounds(330, 190, 250, 19);    /***209, 16, 101, 15 ***/
         majorFrame.getContentPane().add(orderSearchingLabel);
 
         orderMakingLabel = new JLabel("Order Making: ");
@@ -76,7 +81,7 @@ public class GUI {
 
         orderCancelingLabel = new JLabel("Order Canceling: ");
         orderCancelingLabel.setFont(myFt);
-        orderCancelingLabel.setBounds(330, 315, 151, 19);    /***209, 16, 101, 15 ***/
+        orderCancelingLabel.setBounds(330, 376, 151, 19);    /***209, 16, 101, 15 ***/
         majorFrame.getContentPane().add(orderCancelingLabel);
         /*** -------------------- ***/
 
@@ -84,34 +89,106 @@ public class GUI {
         /**************************
          ******   TextFields  ******
          ***************************/
+
+        /** order searching **/
         orderSearchingTextField = new JTextField();
         orderSearchingTextField.setText("   1xxxxxxx    (Student ID)  ");
-        orderSearchingTextField.setBounds(330, 240, 230, 19); /***328, 12, 114, 19**/
+        orderSearchingTextField.setBounds(330, 215, 250, 19); /***328, 12, 114, 19**/
         majorFrame.getContentPane().add(orderSearchingTextField);
-        orderSearchingTextField.setColumns(10);
+        orderSearchingTextField.setColumns(20);
 
-        orderMakingTextField = new JTextField();
-        orderMakingTextField.setText("     ...     (Book No.)   ");
-        orderMakingTextField.setBounds(330, 290, 230, 19); /***328, 12, 114, 19**/
-        majorFrame.getContentPane().add(orderMakingTextField);
-        orderMakingTextField.setColumns(10);
+        /** order updating **/
+        orderNumUpdatingTextField = new JTextField();
+        orderNumUpdatingTextField.setText(" order No. ");
+        orderNumUpdatingTextField.setBounds(330, 240, 83, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(orderNumUpdatingTextField);
+        orderNumUpdatingTextField.setColumns(20);
 
+        bookNumUpdatingTextField = new JTextField();
+        bookNumUpdatingTextField.setText(" book No. ");
+        bookNumUpdatingTextField.setBounds(414, 240, 83, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(bookNumUpdatingTextField);
+        bookNumUpdatingTextField.setColumns(20);
+
+        dateUpdatingTextField = new JTextField();
+        dateUpdatingTextField.setText(" dd/mm/yyyy ");
+        dateUpdatingTextField.setBounds(498, 240, 83, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(dateUpdatingTextField);
+        dateUpdatingTextField.setColumns(20);
+
+        /** order making **/
+        stdOrderMakingTextField = new JTextField();
+        stdOrderMakingTextField.setText(" ... student No. ... ");
+        stdOrderMakingTextField.setBounds(330, 290, 124, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(stdOrderMakingTextField);
+        stdOrderMakingTextField.setColumns(20);
+
+        bookNumOrderMakingTextField = new JTextField();
+        bookNumOrderMakingTextField.setText(" ... book No. ... ");
+        bookNumOrderMakingTextField.setBounds(456, 290, 124, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(bookNumOrderMakingTextField);
+        bookNumOrderMakingTextField.setColumns(20);
+
+        paymentCardNumTextField = new JTextField();
+        paymentCardNumTextField.setText(" ...   card No.    ... ");
+        paymentCardNumTextField.setBounds(330, 351, 250, 19); /***328, 12, 114, 19**/
+        majorFrame.getContentPane().add(paymentCardNumTextField);
+        paymentCardNumTextField.setColumns(20);
+
+
+        /** order canceling **/
         orderCancelingTextField = new JTextField();
         orderCancelingTextField.setText("     ...     (Order No.)   ");
-        orderCancelingTextField.setBounds(330, 340, 230, 19); /***328, 12, 114, 19**/
+        orderCancelingTextField.setBounds(330, 401, 250, 19); /***328, 12, 114, 19**/
         majorFrame.getContentPane().add(orderCancelingTextField);
-        orderCancelingTextField.setColumns(10);
+        orderCancelingTextField.setColumns(20);
         /*** -------------------- ***/
 
 
+        /*** ----------------------------------------------------------- ***/
+        /**************************
+         ****   Radio Buttons  ****
+         ***************************/
+
+        paymentRdBtnCash = new JRadioButton("Cash", true);
+        paymentRdBtnCash.setBounds(330,315,83,30);
+
+        paymentRdBtnCard = new JRadioButton("Card");
+        paymentRdBtnCard.setBounds(414,315,83,30);
+
+        paymentRdBtnTransfer = new JRadioButton("Transfer");
+        paymentRdBtnTransfer.setBounds(498,315,83,30);
+
+        paymentBtGroup = new ButtonGroup();
+        paymentBtGroup.add(paymentRdBtnCash);
+        paymentBtGroup.add(paymentRdBtnCard);
+        paymentBtGroup.add(paymentRdBtnTransfer);
+
+        majorFrame.getContentPane().add(paymentRdBtnCash);
+        majorFrame.getContentPane().add(paymentRdBtnCard);
+        majorFrame.getContentPane().add(paymentRdBtnTransfer);
+        /*** -------------------- ***/
 
         /*** ----------------------------------------------------------- ***/
         /**************************
          *******   Buttons   *******
          ***************************/
+
+        allBooksDisplayButton = new JButton("Update Stock");
+        allBooksDisplayButton.setFont(myFt);
+        allBooksDisplayButton.setBounds(150, 10, 120, 25);   /** 460, 485, 50, 25 **/
+        majorFrame.getContentPane().add(allBooksDisplayButton);
+
+        allBooksDisplayButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getAllBooks();
+            }
+        });
+
         orderSearchingButton = new JButton("Search");
         orderSearchingButton.setFont(myFt);
-        orderSearchingButton.setBounds(570, 240, 100, 25);    /** 460, 485, 50, 25 **/
+        orderSearchingButton.setBounds(590, 210, 100, 25);    /** 460, 485, 50, 25 **/
         majorFrame.getContentPane().add(orderSearchingButton);
 
         orderSearchingButton.addActionListener(new ActionListener() {
@@ -121,21 +198,38 @@ public class GUI {
             }
         });
 
+        dateUpdatingButton = new JButton("Update");
+        dateUpdatingButton.setFont(myFt);
+        dateUpdatingButton.setBounds(590, 240, 100, 25);    /** 460, 485, 50, 25 **/
+        majorFrame.getContentPane().add(dateUpdatingButton);
+
+        dateUpdatingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int input = JOptionPane.showConfirmDialog(null, "Update this record ?", "Date Updating",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+                /** 0=yes, 1=no, 2=cancel **/
+                if(input == 0){
+                    dateUpdating();
+                }
+            }
+        });
+
         orderMakingButton = new JButton("Order");
         orderMakingButton.setFont(myFt);
-        orderMakingButton.setBounds(570, 290, 100, 25);    /** 460, 485, 50, 25 **/
+        orderMakingButton.setBounds(590, 290, 100, 25);    /** 460, 485, 50, 25 **/
         majorFrame.getContentPane().add(orderMakingButton);
 
         orderMakingButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                TimeSeriesMoveLeft();
+                orderMaking();
             }
         });
 
         orderCancelingButton = new JButton("Cancel");
         orderCancelingButton.setFont(myFt);
-        orderCancelingButton.setBounds(570, 340, 100, 25);    /** 460, 485, 50, 25 **/
+        orderCancelingButton.setBounds(590, 401, 100, 25);    /** 460, 485, 50, 25 **/
         majorFrame.getContentPane().add(orderCancelingButton);
 
         orderCancelingButton.addActionListener(new ActionListener() {
@@ -144,9 +238,8 @@ public class GUI {
 //                TimeSeriesMoveLeft();
             }
         });
+
         /*** -------------------- ***/
-
-
 
 
         /*** ----------------------------------------------------------- ***/
@@ -154,36 +247,38 @@ public class GUI {
          ******   Lists  ******
          ***************************/
         /*** availableBooks ***/
-        imageTempList = new JList();
-        imageTempList.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        imageTempList.setFont(myFt);
-        imageTempList.setBounds(10, 35, 140, 131); /*** labelList original Bounds: x=12, y=62, width=130, height=403 ***/
-
-        imageTempScrollPane = new JScrollPane(imageTempList);
-        imageTempScrollPane.setBounds( imageTempList.getBounds() );
-        majorFrame.getContentPane().add(imageTempScrollPane);
+//        imageTempList = new JList();
+//        imageTempList.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+//        imageTempList.setFont(myFt);
+//        imageTempList.setBounds(10, 35, 140, 131); /*** labelList original Bounds: x=12, y=62, width=130, height=403 ***/
+//
+//        imageTempScrollPane = new JScrollPane(imageTempList);
+//        imageTempScrollPane.setBounds( imageTempList.getBounds() );
+//        majorFrame.getContentPane().add(imageTempScrollPane);
         /* availableBooks */
 
-        /*** availableBooks ***/
-        availableBooksList = new JList();
-        availableBooksList.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        availableBooksList.setFont(myFt);
-        availableBooksList.setBounds(170, 35, 540, 131); /*** labelList original Bounds: x=12, y=62, width=130, height=403 ***/
+        /*** allBooksTextArea ***/
+        allBooksTextArea = new JTextArea();
+        allBooksTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        allBooksTextArea.setFont(myFt);
+        allBooksTextArea.setBounds(10, 35, 250, 141); /*** labelList original Bounds: x=12, y=62, width=130, height=403 ***/
+        allBooksTextArea.setLineWrap(true);
+        allBooksTextArea.setWrapStyleWord(true);
 
-        availableBooksScrollPane = new JScrollPane(availableBooksList);
-        availableBooksScrollPane.setBounds( availableBooksList.getBounds() );
-        majorFrame.getContentPane().add(availableBooksScrollPane);
+        allBooksScrollPane = new JScrollPane(allBooksTextArea);
+        allBooksScrollPane.setBounds( allBooksTextArea.getBounds() );
+        majorFrame.getContentPane().add(allBooksScrollPane);
         /* availableBooks */
 
-        /*** bookingRecords ***/
+        /*** Image ***/
 //        bookingRecordsList = new JList();
 //        bookingRecordsList.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 //        bookingRecordsList.setFont(myFt);
 //        bookingRecordsList.setBounds(10, 215, 270, 151); /*** labelList original Bounds: x=12, y=62, width=130, height=403 ***/
 
-//        bookingRecordsScrollPane = new JScrollPane(bookingRecordsList);
-//        bookingRecordsScrollPane.setBounds( bookingRecordsList.getBounds() );
-//        majorFrame.getContentPane().add(bookingRecordsScrollPane);
+        imageScrollPane = new JScrollPane();
+        imageScrollPane.setBounds(265, 35, 460, 141);
+        majorFrame.getContentPane().add(imageScrollPane);
         /* availableBooks */
         /*** -------------------- ***/
 
@@ -191,7 +286,9 @@ public class GUI {
         consoleBoxTextArea = new JTextArea();
         consoleBoxTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
         consoleBoxTextArea.setFont(myFt);
-        consoleBoxTextArea.setBounds(10, 215, 280, 151);
+        consoleBoxTextArea.setBounds(10, 215, 270, 151);
+        consoleBoxTextArea.setLineWrap(true);
+        consoleBoxTextArea.setWrapStyleWord(true);
 
 //        System.out.println("Width:" + consoleBoxTextArea.getPreferredSize());
 
@@ -203,58 +300,84 @@ public class GUI {
 
     }
 
+    /*** ---------------------------------------------------------------------------------------------------------- ***/
+
+    /*** consoleBoxSetText ***/
     public void consoleBoxSetText(String str){
         consoleBoxTextArea.setText(str);
     }
+    public void allBooksSetText(String str){ allBooksTextArea.setText(str); }
 
-    public void getShopMenus(){
-        String menuStr;
-        menuStr = managerDB.shopMenus();
-        consoleBoxSetText(menuStr);
+    /*** getAllBooks ***/
+    public void getAllBooks(){
+        String bookListStr = "";
+        bookListStr = managerDB.printBookList();
+        allBooksSetText(bookListStr);
     }
 
+    /*** orderSearching ***/
     public void orderSearching(){
         String orderInfoStr = "";
         orderInfoStr = managerDB.orderSearch(orderSearchingTextField.getText());
         consoleBoxSetText(orderInfoStr);
     }
 
+    /*** order date updating ***/
+    public void dateUpdating(){
+        String orderStr, bookNumStr, dateStr;
+        orderStr = orderNumUpdatingTextField.getText();
+        bookNumStr = bookNumUpdatingTextField.getText();
+        dateStr = dateUpdatingTextField.getText();
+
+        if(managerDB.orderDateUpdate(orderStr, bookNumStr, dateStr)){
+            JOptionPane.showMessageDialog(null, "Successfully updated!");
+        }else{
+            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the three input values.");
+        }
+
+
+
+    }
+
+    /*** order making ***/
+    public void orderMaking(){
+        String orderConfirmInfoStr = "";
+        String stdNumStr, bookNumStr;
+        int choice = -1;
+        String cardNumber = null;
+
+        stdNumStr = stdOrderMakingTextField.getText();
+        bookNumStr = bookNumOrderMakingTextField.getText();
+
+
+        if(paymentRdBtnCash.isSelected()){
+            choice = 1;
+        }
+        else if(paymentRdBtnCard.isSelected()){
+            choice = 2;
+            cardNumber = paymentCardNumTextField.getText();
+        }else if(paymentRdBtnTransfer.isSelected()){
+            choice = 3;
+        }
+
+        orderConfirmInfoStr = managerDB.orderMaking(stdNumStr, bookNumStr, choice, cardNumber);
+
+        if(orderConfirmInfoStr != null){
+            consoleBoxSetText(orderConfirmInfoStr);
+            getAllBooks();
+        }else{
+            consoleBoxSetText("Order making failed");
+        }
+
+    }
+
     /*** Engine run() ***/
     public void run() {
-    while (managerDB.noException){}
+        getAllBooks();
+        while (managerDB.noException){}
     }
-//    public void run() {
-//        String str = "";
-//        while (managerDB.noException) {
-//            getShopMenus();
-//            String line = in.nextLine();
-////			String line = menuStr;
-//            if (line.equalsIgnoreCase("exit"))
-//                return;
-//            int choice = -1;
-//            try {
-//                choice = Integer.parseInt(line);
-//            } catch (Exception e) {
-//                System.out.println("Enter wrong number!");
-//                continue;
-//            }
-//            if (!(choice >= 1 && choice <= menus.length)) {
-//                System.out.println("Enter wrong number!");
-//                continue;
-//            }
-//            if (menus[choice - 1].equals("1. Order Search/Update")) {
-//                orderSearch();
-//            } else if (menus[choice - 1].equals("2. Order Making")) {
-//                orderMaking();
-//            } else if (menus[choice - 1].equals("3. Order Cancelling")) {
-//                orderCancelling();
-//            } else if (menus[choice - 1].equals("exit")) {
-//                break;
-//            }
-//        }
-//    }
 
-
+    /*** fire ***/
     public void fire(){
         /*** GUI - DB ***/
         String myMenuStr, stdIDStr;
@@ -288,7 +411,7 @@ public class GUI {
                 }
             });
             /*** ------------------------- ***/
-            consoleBoxSetText("Welcome to the GUI Testing! Please follow \n the instruction to check the record:\n 1.\n 2.\n 3.");
+            consoleBoxSetText("Welcome to the GUI Testing! Please follow the instruction to check the record:\n 1.\n 2.\n 3.");
 
             /***  ***/
             run();
@@ -303,7 +426,7 @@ public class GUI {
     /*** main() ***/
     public static void main(String[] args) {
         // TODO code application logic here
-        GUI GUIWin = new GUI();
-        GUIWin.fire();
+        GUI_Core GUICoreWin = new GUI_Core();
+        GUICoreWin.fire();
     }
 }
