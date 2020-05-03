@@ -45,8 +45,8 @@ public class GUI_Core {
          *** MajorFrame Setting  ***
          ***************************/
         majorFrame = new JFrame();
-        majorFrame.setTitle("Online Book Store - Group Eleven");
-        majorFrame.setBounds(100, 100, 751, 500);
+        majorFrame.setTitle("Online Book Store - Group Twelve");
+        majorFrame.setBounds(170, 170, 751, 500);
         majorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         majorFrame.getContentPane().setLayout(null);
 
@@ -366,14 +366,14 @@ public class GUI_Core {
 
     public void bookStoreRecordInfo(){
         String info = "";
-        info += "Welcome to the Online Book Store - Group Eleven! Please follow the instruction to check the record:\n\n";
+        info += "Welcome to the Online Book Store - Group Twelve! Please follow the instruction to check the record:\n\n";
 
         info += "1:\n";
 
         info += "---Order making requirements---\n\n";
         info += "I. Every book in the order is NOT out of stock\n";
         info += "II. Not have any outstanding orders(All books ordered earlier had been delivered)\n\n";
-        info += "-----------------------------\n\n\n";
+        info += "-----------------------------\n\n";
 
         info += "2:\n";
         info += "--Order cancelling requirements--\n\n";
@@ -423,13 +423,23 @@ public class GUI_Core {
         bookNumStr = bookNumUpdatingTextField.getText();
         dateStr = dateUpdatingTextField.getText();
 
-        if(managerDB.orderDateUpdate(orderStr, bookNumStr, dateStr)){
-//            JOptionPane.showMessageDialog(null, "Successfully updated!");
-            consoleBoxSetText("Successfully updated!");
-        }else{
-//            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the your book No. and Order No. .");
+        System.out.println("orderStr: " + orderStr);
+        System.out.println("bookNumStr: " + bookNumStr);
+        System.out.println("dateStr: " + dateStr);
+
+        if(orderStr == null || bookNumStr == null || dateStr == null || orderStr.equals("") || bookNumStr.equals("")|| dateStr.equals("")){
             consoleBoxSetText("Update failed!\nPlease check the your book No. and Order No. .");
         }
+        else{
+            if(managerDB.orderDateUpdate(orderStr, bookNumStr, dateStr)){
+//            JOptionPane.showMessageDialog(null, "Successfully updated!");
+                consoleBoxSetText("Successfully updated!");
+            }else{
+//            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the your book No. and Order No. .");
+                consoleBoxSetText("Update failed!\nPlease check the your book No. and Order No. .");
+            }
+        }
+
     }
 
     /*** orderMaking ***/
@@ -469,6 +479,7 @@ public class GUI_Core {
         }else{
             consoleBoxSetText(orderInfoStr);
         }
+        getAllBooks();
         getAllOrders();
     }
 
@@ -491,7 +502,7 @@ public class GUI_Core {
 
         /*** Invoke bookshop ***/
         managerDB = new bookshop();
-        if (!managerDB.loginProxy()) {
+        if (!managerDB.auTologinProxy()) {
             System.out.println("Login proxy failed, please re-examine your username and password!");
             return;
         }

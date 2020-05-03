@@ -48,8 +48,8 @@ public class bookshop_test {
     // JDBC connecting port
     int jdbcPort;
 
-    final String global_sshUser = "exxxxxxx"; // exxxxxxx
-    final String global_sshPwd = "exxxxxxx"; // exxxxxxx
+    String global_sshUser = "exxxxxxx"; // exxxxxxx
+    String global_sshPwd = "exxxxxxx"; // exxxxxxx
 
     public bookshop_test() {
         System.out.println("Welcome to ABC University Online Bookshop!");
@@ -136,6 +136,8 @@ public class bookshop_test {
                 if (adminFun == 1) {
                     printAllOrders();
                 }else if (adminFun == 2) {
+                    System.out.println("Please input a student number:");
+                    line = in.nextLine();
                     int snum = Integer.parseInt(line);
                     boolean checkNo = checkSnum(snum);
                     if (checkNo == true)
@@ -270,7 +272,7 @@ public class bookshop_test {
                 //Finish update
 
                 //Update discount_lv into Student Table
-                updateDiscountLV(total_price,Snum);
+                updateDiscountLV(Snum);
                 //Update finish
 
                 //Update Deliver Table
@@ -334,6 +336,16 @@ public class bookshop_test {
 
             cancelOrder(order_no);
 
+            String[] orderBnum = new String[20];
+            orderBnum = getBnumByOrderNo(order_no);
+            for (int i = 0; orderBnum[i] != null; i++)
+            {
+//				System.out.println(orderBnum[i]);
+                cancelBook(orderBnum[i]);
+            }
+
+            updateDiscountLV(snum);
+
             System.out.println("Order cancel successful!");
 
         }else if(orderCancelChoice.equalsIgnoreCase("no")) {
@@ -341,7 +353,6 @@ public class bookshop_test {
         }else {
 
         }
-
     }
 
     private void printAllOrders() {
@@ -376,43 +387,20 @@ public class bookshop_test {
 
     private void printOrderBySnum(int Snum) {
         try {
-            String[] heads1 = { "Student_ID", "Name", "Gender", "Major", "Discount_Level"};
-            String[] heads2 = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
-                    "Total_Price", "Payment_method", "Card_No","Bnum","Deliver_Date"};
-
             Statement stm = conn.createStatement();
-            String sql1 =
-                    "SELECT SNUM, NAME, GENDER, MAJOR, DISCOUNT_LEVEL"
-                            + " FROM STUDENT"
-                            + " WHERE SNUM = " + Snum;
-            ResultSet rs1 = stm.executeQuery(sql1);
-
-            while (rs1.next()) {
-                for (int i = 0; i < heads1.length; ++i) { //Print 5 attributes from PLACE_ORDER + DELIVER
-                    try {
-                        String value = rs1.getString( i + 1 );
-                        if (value == null) {value = "";}
-                        System.out.println(heads1[i] + " : " + value);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-                System.out.println("-------------------------\n\n");
-            }
-
-            sql1 =
-                    "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
+            String sql = "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
                     + "BNUM,DELIVERY_DATE"
-                    + " FROM PLACE_ORDER, DELIVER"
-                    + " WHERE STUDENT = " + Snum
+                    + " FROM PLACE_ORDER,DELIVER WHERE STUDENT = " + Snum
                     + " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
-            rs1 = stm.executeQuery(sql1);
-            while (rs1.next()) {
-                for (int i = 0; i < heads2.length; ++i) { //Print 9 attributes from PLACE_ORDER + DELIVER
+            ResultSet rs = stm.executeQuery(sql);
+            String[] heads = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
+                    "Total_Price", "Payment_method", "Card_No","Bnum","Deliver_Date"};
+            while (rs.next()) {
+                for (int i = 0; i < 9; ++i) { //Print 9 attributes from PLACE_ORDER + DELIVER
                     try {
-                        String value = rs1.getString( i + 1 );
+                        String value = rs.getString( i + 1 );
                         if (value == null) {value = "";}
-                        System.out.println(heads2[i] + " : " + value);
+                        System.out.println(heads[i] + " : " + value);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -420,7 +408,7 @@ public class bookshop_test {
                 System.out.println("-------------------------");
             }
 
-            rs1.close();
+            rs.close();
             stm.close();
         } catch (SQLException e1) {
             e1.printStackTrace();
@@ -498,26 +486,22 @@ public class bookshop_test {
 
     private boolean checkNextOrder(int Snum) {
         try {
-
-//            String sql = "SELECT SNUM FROM STUDENT" +
-//                    " WHERE SNUM = " + Snum;
-//            ResultSet rs = stm.executeQuery(sql);
-//            if(!rs.next()) {
-//                System.out.println("Student number not found!");
-//                rs.close();
-//                stm.close();
-//                return false;
-//            }
-//            rs.close();
-            if(!checkSnum(Snum)){
+            Statement stm = conn.createStatement();
+            String sql = "SELECT SNUM FROM STUDENT" +
+                    " WHERE SNUM = " + Snum;
+            ResultSet rs = stm.executeQuery(sql);
+            if(!rs.next()) {
+                System.out.println("Student number not found!");
+                rs.close();
+                stm.close();
                 return false;
             }
+            rs.close();
 
-            Statement stm = conn.createStatement();
-            String sql = "SELECT DELIVERY_DATE"
+            sql = "SELECT DELIVERY_DATE"
                     + " FROM PLACE_ORDER,DELIVER WHERE STUDENT = " + Snum
                     + " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
-            ResultSet rs = stm.executeQuery(sql);
+            rs = stm.executeQuery(sql);
             while (rs.next()) {
                 try {
                     String value = rs.getString(1);
@@ -784,11 +768,11 @@ public class bookshop_test {
             e1.printStackTrace();
             noException = false;
         }
-
     }
 
-    private void updateDiscountLV(Double total_price,int Snum) {
+    private void updateDiscountLV(int Snum) {
         Double discount_Lv = 1.0;
+        Double total_price = 0.0;
 
         try {
             Statement stm = conn.createStatement();
@@ -798,9 +782,9 @@ public class bookshop_test {
             if(rs.next()) {
                 try {
                     String value = rs.getString(1);
-                    //System.out.println(value);
+                    System.out.println(value);
                     if (value == null) {value = "0";}
-                    total_price = total_price + Double.parseDouble(value);
+                    total_price = Double.parseDouble(value);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -955,6 +939,53 @@ public class bookshop_test {
             //System.out.println(sql);
             stm.executeUpdate(sql);
             sql = "DELETE FROM PLACE_ORDER WHERE ORDER_NO = '" + order_no.toUpperCase() + "'" ;
+            stm.executeUpdate(sql);
+            stm.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+        }
+    }
+
+    private String[] getBnumByOrderNo(String order_no) {
+        String orderedBnum[] = new String[20];
+        int bookNumberCount = 0;
+
+        try {
+            Statement stm = conn.createStatement();
+            String sql = "SELECT BNUM FROM DELIVER"
+                    + " WHERE ORDER_NO = '" + order_no.toUpperCase() + "'";
+            ResultSet rs = stm.executeQuery(sql);
+            while (rs.next()) {
+                try {
+                    String value = rs.getString(1);
+                    orderedBnum[bookNumberCount] = value;
+                    bookNumberCount++;
+//					System.out.println(value);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            rs.close();
+            stm.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            noException = false;
+        }
+
+        return orderedBnum;
+    }
+
+    private void cancelBook(String Bnum) {
+        try {
+            Statement stm = conn.createStatement();
+            int amount = getBookAmount(Bnum) + 2;
+
+            String sql = "UPDATE BOOK " +
+                    "SET AMOUNT = " + amount +
+                    " WHERE BNUM = '" + Bnum.toUpperCase() + "'";
+
+            //System.out.println(sql);
             stm.executeUpdate(sql);
             stm.close();
         } catch (SQLException e1) {
