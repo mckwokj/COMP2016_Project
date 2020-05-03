@@ -48,8 +48,8 @@ public class bookshop_test {
     // JDBC connecting port
     int jdbcPort;
 
-    final String global_sshUser = "exxxxxxx";
-    final String global_sshPwd = "xxxxxxx";
+    final String global_sshUser = "exxxxxxx"; // exxxxxxx
+    final String global_sshPwd = "exxxxxxx"; // exxxxxxx
 
     public bookshop_test() {
         System.out.println("Welcome to ABC University Online Bookshop!");
@@ -376,20 +376,43 @@ public class bookshop_test {
 
     private void printOrderBySnum(int Snum) {
         try {
-            Statement stm = conn.createStatement();
-            String sql = "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
-                    + "BNUM,DELIVERY_DATE"
-                    + " FROM PLACE_ORDER,DELIVER WHERE STUDENT = " + Snum
-                    + " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
-            ResultSet rs = stm.executeQuery(sql);
-            String[] heads = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
+            String[] heads1 = { "Student_ID", "Name", "Gender", "Major", "Discount_Level"};
+            String[] heads2 = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
                     "Total_Price", "Payment_method", "Card_No","Bnum","Deliver_Date"};
-            while (rs.next()) {
-                for (int i = 0; i < 9; ++i) { //Print 9 attributes from PLACE_ORDER + DELIVER
+
+            Statement stm = conn.createStatement();
+            String sql1 =
+                    "SELECT SNUM, NAME, GENDER, MAJOR, DISCOUNT_LEVEL"
+                            + " FROM STUDENT"
+                            + " WHERE SNUM = " + Snum;
+            ResultSet rs1 = stm.executeQuery(sql1);
+
+            while (rs1.next()) {
+                for (int i = 0; i < heads1.length; ++i) { //Print 5 attributes from PLACE_ORDER + DELIVER
                     try {
-                        String value = rs.getString( i + 1 );
+                        String value = rs1.getString( i + 1 );
                         if (value == null) {value = "";}
-                        System.out.println(heads[i] + " : " + value);
+                        System.out.println(heads1[i] + " : " + value);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("-------------------------\n\n");
+            }
+
+            sql1 =
+                    "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
+                    + "BNUM,DELIVERY_DATE"
+                    + " FROM PLACE_ORDER, DELIVER"
+                    + " WHERE STUDENT = " + Snum
+                    + " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
+            rs1 = stm.executeQuery(sql1);
+            while (rs1.next()) {
+                for (int i = 0; i < heads2.length; ++i) { //Print 9 attributes from PLACE_ORDER + DELIVER
+                    try {
+                        String value = rs1.getString( i + 1 );
+                        if (value == null) {value = "";}
+                        System.out.println(heads2[i] + " : " + value);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }
@@ -397,7 +420,7 @@ public class bookshop_test {
                 System.out.println("-------------------------");
             }
 
-            rs.close();
+            rs1.close();
             stm.close();
         } catch (SQLException e1) {
             e1.printStackTrace();
@@ -1028,8 +1051,8 @@ public class bookshop_test {
     /*** boolean ***/
     /*** Remember to change your password***/
     public boolean loginDB() {
-        String username = "e1234567";//Replace e1234567 to your username
-        String password = "e1234567";//Replace e1234567 to your password
+        String username = "e9214294";//Replace e1234567 to your username
+        String password = "e9214294";//Replace e1234567 to your password
 
         /* Do not change the code below */
         if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {

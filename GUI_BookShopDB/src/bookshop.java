@@ -44,8 +44,8 @@ public class bookshop {
 	// JDBC connecting port
 	int jdbcPort;
 
-	final String global_sshUser = "exxxxxx";
-	final String global_sshPwd = "xxxxxxxx";
+	final String global_sshUser = "exxxxxxx"; // exxxxxxx
+	final String global_sshPwd = "exxxxxxx"; // exxxxxxx
 
 	boolean exitFlag = false;
 
@@ -335,64 +335,80 @@ public class bookshop {
 	}
 
 	/*** orderCancelling ***/
-	private void orderCancelling() {  //main function 3:
+	public String orderCancelling(String orderNum) {  //main function 3:
+		String orderCancellingInfoStr = null;
+		String anOrderStr = null;
+
 		System.out.println("------------Order cancelling requirements------------");
 		System.out.println("I. None of the books in the order has been delivered");
 		System.out.println("II. Order was made within 7 days");
 		System.out.println("-----------------------------------------------------");
 		System.out.println("Please input the Student ID or type 'exit' back to main menu:");
-		String line = in.nextLine();
-		line = line.trim();
+//		String line = in.nextLine();
+//		line = line.trim();
 //		System.out.println(line);
-		if (line.equalsIgnoreCase("exit"))
-			return;
+//		if (line.equalsIgnoreCase("exit"))
+//			return null;
 
-		int snum = Integer.parseInt(line);
-		boolean checkNo = checkSnum(snum);
-		if (checkNo == true) {
-			System.out.println("-----------------------------------------------------");
-			System.out.println("--------------Display all order records--------------");
-			System.out.println("-----------------------------------------------------");
-			printOrderBySnum(snum);
-		}
+//		int snum = Integer.parseInt(line);
+//		boolean checkNo = checkSnum(snum);
+//		if (checkNo == true) {
+//			System.out.println("-----------------------------------------------------");
+//			System.out.println("--------------Display all order records--------------");
+//			System.out.println("-----------------------------------------------------");
+//			printOrderBySnum(snum);
+//		}
 
 		System.out.println("Please enter an order number to finish order cancelling:");
-		String order_no = in.nextLine();
+//		String order_no = in.nextLine();
+		String order_no = orderNum;
 		order_no = order_no.trim();
-		printOrderByOrderNo(order_no);
+
+		anOrderStr = printOrderByOrderNo(order_no);
 
 		System.out.println("Cancel this order? (Yes / No):");
-		String orderCancelChoice = in.nextLine();
-		orderCancelChoice = orderCancelChoice.trim();
-		if(orderCancelChoice.equalsIgnoreCase("yes")) {
+//        String orderCancelChoice = in.nextLine();
 
-			//check at least order book delivered or not
-			if (checkOrderDelivered(order_no) == false) {
-				System.out.println("Order cancelling fail!");
-				System.out.println("Some book of this order had been deliverd!");
-				return;
-			}
+//        orderCancelChoice = orderCancelChoice.trim();
+//        if(orderCancelChoice.equalsIgnoreCase("yes")) {
 
-			if (checkOrderDateWithin7(order_no) == false) {
-				System.out.println("Order cancelling fail!");
-				System.out.println("Order made before 7 days!");
-				return;
-			}
-
-			cancelOrder(order_no);
-
-			System.out.println("Order cancel successful!");
-
-		}else if(orderCancelChoice.equalsIgnoreCase("no")) {
-
-		}else {
-
+		//check at least order book delivered or not
+		if (checkOrderDelivered(order_no) == false) {
+			System.out.println("Order cancelling failed!");
+			System.out.println("Some book of this order had been delivered!");
+			orderCancellingInfoStr = "Order cancelling failed!\n" + "Some book of this order had been delivered!\n";
+			return orderCancellingInfoStr;
 		}
+
+		if (checkOrderDateWithin7(order_no) == false) {
+			System.out.println("Order cancelling failed!");
+			System.out.println("Order made before 7 days!");
+			orderCancellingInfoStr = "Order cancelling failed!\n" + "Order made before 7 days!\n";
+			return orderCancellingInfoStr;
+		}
+
+		if(!cancelOrder(order_no)){
+			orderCancellingInfoStr = "Order cancelling failed\n";
+			return orderCancellingInfoStr;
+		}
+
+		System.out.println("Order cancel successful!");
+
+		orderCancellingInfoStr = "Order cancel successful!\n";
+
+//        }else if(orderCancelChoice.equalsIgnoreCase("no")) {
+//
+//        }else {
+//
+//        }
+		return orderCancellingInfoStr;
 
 	}
 
+
 	/*** printAllOrders ***/
-	private void printAllOrders() {
+	public String printAllOrders() {
+		String allOrdersStr = "";
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
@@ -407,18 +423,21 @@ public class bookshop {
 						String value = rs.getString( i + 1 );
 						if (value == null) {value = "";}
 						System.out.println(heads[i] + " : " + value);
+						allOrdersStr += heads[i] + " : " + value + "\n";
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 				System.out.println("-------------------------");
+				allOrdersStr += "-------------------------\n";
 			}
-
 			rs.close();
 			stm.close();
+			return allOrdersStr;
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			noException = false;
+			return null;
 		}
 	}
 
@@ -426,29 +445,50 @@ public class bookshop {
 	private String printOrderBySnum(int Snum) {
 		String orderStr = "";
 		try {
+			String[] heads1 = { "Student_ID", "Name", "Gender", "Major", "Discount_Level"};
+			String[] heads2 = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
+					"Total_Price", "Payment_method", "Card_No","Bnum","Deliver_Date"};
+
 			Statement stm = conn.createStatement();
-			String sql = "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
+
+			String sql =
+					"SELECT SNUM, NAME, GENDER, MAJOR, DISCOUNT_LEVEL"
+							+ " FROM STUDENT"
+							+ " WHERE SNUM = " + Snum;
+			ResultSet rs = stm.executeQuery(sql);
+			while (rs.next()) {
+				for (int i = 0; i < heads1.length; ++i) { //Print 5 attributes from PLACE_ORDER + DELIVER
+					try {
+						String value = rs.getString( i + 1 );
+						if (value == null) {value = "";}
+						System.out.println(heads1[i] + " : " + value);
+						orderStr += heads1[i] + " : " + value + "\n";
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				System.out.println("-------------------------\n\n");
+				orderStr += "-------------------------\n\n";
+			}
+
+			sql = "SELECT PLACE_ORDER.ORDER_NO,STUDENT,ORDER_DATE,BOOKS_ORDERED,TOTAL_PRICE,PAYMENT_METHOD,CARD_NO,"
 					+ "BNUM,DELIVERY_DATE"
 					+ " FROM PLACE_ORDER,DELIVER WHERE STUDENT = " + Snum
 					+ " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
-			ResultSet rs = stm.executeQuery(sql);
-			String[] heads = { "Order_Number", "Student", "Order_Date", "Books_Ordered",
-					"Total_Price", "Payment_method", "Card_No","Bnum","Deliver_Date"};
+			rs = stm.executeQuery(sql);
 			while (rs.next()) {
 				for (int i = 0; i < 9; ++i) { //Print 9 attributes from PLACE_ORDER + DELIVER
 					try {
 						String value = rs.getString( i + 1 );
 						if (value == null) {value = "";}
-						System.out.println(heads[i] + " : " + value);
-						orderStr += heads[i] + " : " + value + "\n";
+						System.out.println(heads2[i] + " : " + value);
+						orderStr += heads2[i] + " : " + value + "\n";
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 				System.out.println("-------------------------");
-
-				orderStr += "-------------------------" + "\n";
-
+				orderStr += "-------------------------\n";
 			}
 			rs.close();
 			stm.close();
@@ -911,7 +951,8 @@ public class bookshop {
 	}
 
 	/*** printOrderByOrderNo ***/
-	private void printOrderByOrderNo (String Order_no) {
+	public String printOrderByOrderNo (String Order_no) {
+		String orderInfoStr = "";
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "SELECT * FROM PLACE_ORDER"
@@ -925,17 +966,22 @@ public class bookshop {
 						String value = rs.getString( i + 1 );
 						if (value == null) {value = "";}
 						System.out.println(heads[i] + " : " + value);
+						orderInfoStr += heads[i] + " : " + value + "\n";
+
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
 				}
 				System.out.println("-------------------------");
+				orderInfoStr += "-------------------------\n";
 			}
 			rs.close();
 			stm.close();
+			return orderInfoStr;
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			noException = false;
+			return null;
 		}
 	}
 
@@ -1018,7 +1064,7 @@ public class bookshop {
 	}
 
 	/*** cancelOrder ***/
-	private void cancelOrder(String order_no) {
+	private boolean cancelOrder(String order_no) {
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "DELETE FROM DELIVER WHERE ORDER_NO = '" + order_no.toUpperCase() + "'" ;
@@ -1027,9 +1073,11 @@ public class bookshop {
 			sql = "DELETE FROM PLACE_ORDER WHERE ORDER_NO = '" + order_no.toUpperCase() + "'" ;
 			stm.executeUpdate(sql);
 			stm.close();
+			return true;
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			noException = false;
+			return false;
 		}
 	}
 
