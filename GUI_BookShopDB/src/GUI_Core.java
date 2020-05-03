@@ -45,7 +45,7 @@ public class GUI_Core {
          *** MajorFrame Setting  ***
          ***************************/
         majorFrame = new JFrame();
-        majorFrame.setTitle("Testing");
+        majorFrame.setTitle("Online Book Store - Group Eleven");
         majorFrame.setBounds(100, 100, 751, 500);
         majorFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         majorFrame.getContentPane().setLayout(null);
