@@ -366,7 +366,7 @@ public class GUI_Core {
 
     public void bookStoreRecordInfo(){
         String info = "";
-        info += "Welcome to the Online Book Store - Group Eleven! Please follow the instruction to check the record:\n\n\n";
+        info += "Welcome to the Online Book Store - Group Eleven! Please follow the instruction to check the record:\n\n";
 
         info += "1:\n";
 
