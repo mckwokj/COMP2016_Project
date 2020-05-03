@@ -28,8 +28,8 @@ public class GUI_Core {
     private JTextArea consoleBoxTextArea, allBooksTextArea, allOrdersBoxTextArea;
     private JScrollPane imageTempScrollPane, allBooksScrollPane, imageScrollPane, allOrdersScrollPane, consoleBoxScrollPane;
     private JLabel allBooksLabel, allOrdersLabel, bookingRecordsLabel, orderSearchingLabel, orderMakingLabel, orderCancelingLabel, consoleBoxLabel;
-    private JButton orderSearchingButton,dateUpdatingButton, orderMakingButton,orderCancelingButton, allBooksDisplayButton,
-                    allOrdersDisplayButton, showAnOrderingButton;
+    private JButton orderSearchingButton,dateUpdatingButton, orderMakingButton, orderCancelingButton, allBooksDisplayButton,
+                    allOrdersDisplayButton, showAnOrderingButton, infoDisplayButton;
     private JRadioButton paymentRdBtnCash, paymentRdBtnCard, paymentRdBtnTransfer;
     private ButtonGroup paymentBtGroup;
 
@@ -126,7 +126,7 @@ public class GUI_Core {
         stdOrderMakingTextField.setColumns(20);
 
         bookNumOrderMakingTextField = new JTextField();
-        PromptSupport.setPrompt("  ... student No. ... ", bookNumOrderMakingTextField);
+        PromptSupport.setPrompt("  ... book No. ... ", bookNumOrderMakingTextField);
         bookNumOrderMakingTextField.setBounds(468, 290, 137, 19); /***328, 12, 114, 19**/
         majorFrame.getContentPane().add(bookNumOrderMakingTextField);
         bookNumOrderMakingTextField.setColumns(20);
@@ -197,6 +197,18 @@ public class GUI_Core {
             @Override
             public void actionPerformed(ActionEvent e) {
                 getAllOrders();
+            }
+        });
+
+        infoDisplayButton = new JButton("Info");
+        infoDisplayButton.setFont(myFt);
+        infoDisplayButton.setBounds(183, 190, 120, 25);   /** 460, 485, 50, 25 **/
+        majorFrame.getContentPane().add(infoDisplayButton);
+
+        infoDisplayButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                bookStoreRecordInfo();
             }
         });
 
@@ -352,6 +364,25 @@ public class GUI_Core {
     public void allBooksSetText(String str){ allBooksTextArea.setText(str); }
     public void allOrdersBoxSetText(String str){ allOrdersBoxTextArea.setText(str); }
 
+    public void bookStoreRecordInfo(){
+        String info = "";
+        info += "Welcome to the GUI Testing! Please follow the instruction to check the record:\n\n\n";
+
+        info += "1:\n";
+
+        info += "---Order making requirements---\n\n";
+        info += "I. Every book in the order is NOT out of stock\n";
+        info += "II. Not have any outstanding orders(All books ordered earlier had been delivered)\n\n";
+        info += "-----------------------------\n\n\n";
+
+        info += "2:\n";
+        info += "--Order cancelling requirements--\n\n";
+        info += "I. None of the books in the order has been delivered\n";
+        info += "II. Order was made within 7 days\n\n";
+        info += "-----------------------------\n";
+
+        consoleBoxSetText(info);
+    }
 
     /*** getAllBooks ***/
     public void getAllBooks(){
@@ -393,9 +424,11 @@ public class GUI_Core {
         dateStr = dateUpdatingTextField.getText();
 
         if(managerDB.orderDateUpdate(orderStr, bookNumStr, dateStr)){
-            JOptionPane.showMessageDialog(null, "Successfully updated!");
+//            JOptionPane.showMessageDialog(null, "Successfully updated!");
+            consoleBoxSetText("Successfully updated!");
         }else{
-            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the three input values.");
+//            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the your book No. and Order No. .");
+            consoleBoxSetText("Update failed!\nPlease check the your book No. and Order No. .");
         }
     }
 
@@ -422,13 +455,9 @@ public class GUI_Core {
 
         orderConfirmInfoStr = managerDB.orderMaking(stdNumStr, bookNumStr, choice, cardNumber);
 
-        if(orderConfirmInfoStr != null){
-            consoleBoxSetText(orderConfirmInfoStr);
-            getAllBooks();
-        }else{
-            consoleBoxSetText("Order making failed");
-        }
-
+        consoleBoxSetText(orderConfirmInfoStr);
+        getAllBooks();
+        getAllOrders();
     }
 
     /*** orderCancelling ***/
@@ -445,6 +474,7 @@ public class GUI_Core {
 
     /*** Engine run() ***/
     public void run() {
+        bookStoreRecordInfo();
         getAllBooks();
         getAllOrders();
         while (managerDB.noException){}
@@ -461,7 +491,7 @@ public class GUI_Core {
 
         /*** Invoke bookshop ***/
         managerDB = new bookshop();
-        if (!managerDB.auTologinProxy()) {
+        if (!managerDB.loginProxy()) {
             System.out.println("Login proxy failed, please re-examine your username and password!");
             return;
         }
@@ -484,26 +514,8 @@ public class GUI_Core {
                 }
             });
             /*** ------------------------- ***/
-            String info = "";
-            info += "Welcome to the GUI Testing! Please follow the instruction to check the record:\n\n\n";
-
-            info += "1:\n";
-
-            info += "---Order making requirements---\n\n";
-            info += "I. Every book in the order is NOT out of stock\n";
-            info += "II. Not have any outstanding orders(All books ordered earlier had been delivered)\n\n";
-            info += "-----------------------------\n\n\n";
-
-            info += "2:\n";
-            info += "--Order cancelling requirements--\n\n";
-            info += "I. None of the books in the order has been delivered\n";
-            info += "II. Order was made within 7 days\n\n";
-            info += "-----------------------------\n";
-
-            consoleBoxSetText(info);
-
-            /***  ***/
             run();
+            /***  ***/
         } finally {
             managerDB.close();
         }

@@ -968,7 +968,7 @@ public class bookshop_test {
     /*** main() ***/
 	public static void main(String[] args) {
 		bookshop_test manager = new bookshop_test();
-		if (!manager.auTologinProxy()) {
+		if (!manager.loginProxy()) {
 			System.out.println("Login proxy failed, please re-examine your username and password!");
 			return;
 		}

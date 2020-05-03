@@ -13,6 +13,11 @@ import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.*;
+import javax.swing.text.Document;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -44,8 +49,8 @@ public class bookshop {
 	// JDBC connecting port
 	int jdbcPort;
 
-	final String global_sshUser = "exxxxxxx"; // exxxxxxx
-	final String global_sshPwd = "exxxxxxx"; // exxxxxxx
+	String global_sshUser = "exxxxxxx"; // exxxxxxx
+	String global_sshPwd = "exxxxxxx"; // exxxxxxx
 
 	boolean exitFlag = false;
 
@@ -140,8 +145,12 @@ public class bookshop {
 			boolean checkNo = checkSnum(snum);
 			if (checkNo == true){
 				orderSearchOrUpdatingStr = printOrderBySnum(snum);
+				return orderSearchOrUpdatingStr;
+			}else{
+				orderSearchOrUpdatingStr = "Student number not found!";
+				return orderSearchOrUpdatingStr;
 			}
-			return orderSearchOrUpdatingStr;
+
 		}
 
 		orderSearchOrUpdatingStr = "Your input student ID is null value.";
@@ -233,12 +242,17 @@ public class bookshop {
 
 		String line = stdNumStr;
 		line = line.trim();
-		if (line.equalsIgnoreCase("exit"))
-			return null;
+
+//		if (line.equalsIgnoreCase("exit"))
+//			return null;
 
 		int Snum = Integer.parseInt(line);
-		if (checkNextOrder(Snum) == false)
-			return null;
+
+		String checkOrder = null;
+		checkOrder = checkNextOrder(Snum);
+		if (!checkOrder.contains("Yes")){
+			return checkOrder;
+		}
 
 		//making order
 		System.out.println("Please input book number:");
@@ -250,8 +264,9 @@ public class bookshop {
 		String book_name = null;
 		for (int i = 0; i < Bnum.length; ++i) {
 			Bnum[i] = Bnum[i].trim();
-			if (checkBookAmount(Bnum[i]) == false)
-				return null;
+			String checkBookAmountStr = checkBookAmount(Bnum[i]);
+			if (!checkBookAmountStr.contains("Yes"))
+				return checkBookAmountStr;
 		}
 
 		for (int i = 0; i < Bnum.length; ++i) {
@@ -312,7 +327,7 @@ public class bookshop {
 		//Finish update
 
 		//Update discount_lv into Student Table
-		updateDiscountLV(total_price, Snum);
+		updateDiscountLV(Snum);
 		//Update finish
 
 		//Update Deliver Table
@@ -387,10 +402,30 @@ public class bookshop {
 			return orderCancellingInfoStr;
 		}
 
+		String snum = getStudentNum(order_no);
+		if(snum == null){
+			System.out.println("Get student ID error! We cannot update the discount level.");
+			orderCancellingInfoStr = "Get student ID error! We cannot update the discount level.";
+			return orderCancellingInfoStr;
+		}
+
+
 		if(!cancelOrder(order_no)){
 			orderCancellingInfoStr = "Order cancelling failed\n";
 			return orderCancellingInfoStr;
 		}
+
+		updateDiscountLV(Integer.parseInt(snum)); /** new 3 **/
+
+		String[] orderBnum = new String[20];
+		orderBnum = getBnumByOrderNo(order_no); /** 1 **/
+		for (int i = 0; orderBnum[i] != null; i++)
+		{
+//				System.out.println(orderBnum[i]);
+			cancelBook(orderBnum[i]); /** new 2 **/
+		}
+
+
 
 		System.out.println("Order cancel successful!");
 
@@ -405,6 +440,37 @@ public class bookshop {
 
 	}
 
+	/*** getStudentNum ***/
+	public String getStudentNum(String orderNum){
+		String order_no = orderNum;
+		order_no = order_no.trim();
+		System.out.println("Order Num:" + order_no);
+		try {
+			Statement stm = conn.createStatement();
+			String sql = "SELECT DISTINCT STUDENT"
+					+ " FROM PLACE_ORDER"
+					+ " WHERE ORDER_NO = '" + order_no + "'";
+			ResultSet rs = stm.executeQuery(sql);
+			while (rs.next()) {
+					try {
+						String value = rs.getString( 1 );
+						if (value == null) {value = "";}
+						System.out.println("Student ID: " + value);
+
+						return value;
+
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+			}
+			rs.close();
+			stm.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			noException = false;
+		}
+		return null;
+	}
 
 	/*** printAllOrders ***/
 	public String printAllOrders() {
@@ -576,7 +642,8 @@ public class bookshop {
 	}
 
 	/*** checkNextOrder ***/
-	private boolean checkNextOrder(int Snum) {
+	private String checkNextOrder(int Snum) {
+		String checkOrderStr = null;
 		try {
 //			Statement stm = conn.createStatement();
 //			String sql = "SELECT SNUM FROM STUDENT" +
@@ -591,7 +658,7 @@ public class bookshop {
 //			rs.close();
 
 			if(!checkSnum(Snum)){
-				return false;
+				return "Student number not found!";
 			}
 
 			Statement stm = conn.createStatement();
@@ -609,10 +676,14 @@ public class bookshop {
 					String value = rs.getString(1);
 					if (value == null) { /** When the value is null, it means delivery_date has not set yet **/
 						System.out.println("Books ordered earlier hadn't been delivered!");
-						System.out.println("New order making fail!");
+						System.out.println("New order making failed!");
+
+						checkOrderStr = "Books ordered earlier hadn't been delivered!\n";
+						checkOrderStr += "New order making failed!\n";
+
 						rs.close();
 						stm.close();
-						return false;
+						return checkOrderStr;
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -624,7 +695,7 @@ public class bookshop {
 			e1.printStackTrace();
 			noException = false;
 		}
-		return true;
+		return "Yes";
 	}
 
 	/*** printBookList ***/
@@ -662,7 +733,8 @@ public class bookshop {
 	}
 
 	/*** checkBookAmount ***/
-	private boolean checkBookAmount(String Bnum) {
+	private String checkBookAmount(String Bnum) {
+		String bookAmountStr = null;
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "SELECT AMOUNT FROM BOOK" +
@@ -670,18 +742,20 @@ public class bookshop {
 			ResultSet rs = stm.executeQuery(sql);
 			if(!rs.next()) {
 				System.out.println("Book: " + Bnum + " not found!");
+				bookAmountStr = "Book: " + Bnum + " not found!\n";
 				rs.close();
 				stm.close();
-				return false;
+				return bookAmountStr;
 			}
 			else {
 				try {
 					String value = rs.getString(1);
 					if (Integer.parseInt(value) == 0) {
 						System.out.println("Books: " + Bnum + " out of stocks!");
+						bookAmountStr = "Books: " + Bnum + " out of stocks!\n";
 						rs.close();
 						stm.close();
-						return false;
+						return bookAmountStr;
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -693,8 +767,7 @@ public class bookshop {
 			e1.printStackTrace();
 			noException = false;
 		}
-
-		return true;
+		return "Yes";
 	}
 
 	/*** getBookName ***/
@@ -892,8 +965,50 @@ public class bookshop {
 	}
 
 	/*** updateDiscountLV ***/
-	private void updateDiscountLV(double total_price,int Snum) {
-		double discount_Lv = 1.0;
+//	private void updateDiscountLV(double total_price,int Snum) {
+//		double discount_Lv = 1.0;
+//
+//		try {
+//			Statement stm = conn.createStatement();
+//			String sql = "SELECT SUM(TOTAL_PRICE) FROM PLACE_ORDER " +
+//					"WHERE STUDENT = " + Snum;
+//			ResultSet rs = stm.executeQuery(sql);
+//			if(rs.next()) {
+//				try {
+//					String value = rs.getString(1);
+//					//System.out.println(value);
+//					if (value == null) {value = "0";}
+//					total_price = total_price + Double.parseDouble(value);
+//				} catch (SQLException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			rs.close();
+//
+//			if (total_price >= 1000 && total_price < 2000) {
+//				discount_Lv = 0.9;
+//			}else if (total_price >= 2000) {
+//				discount_Lv = 0.8;
+//			}else {
+//				return;
+//			}
+//
+//			sql = "UPDATE STUDENT " +
+//					"SET DISCOUNT_LEVEL = " + discount_Lv +
+//					" WHERE Snum = " + Snum;
+//
+//			//System.out.println(sql);
+//			stm.executeUpdate(sql);
+//			stm.close();
+//		} catch (SQLException e1) {
+//			e1.printStackTrace();
+//			noException = false;
+//		}
+//
+//	}
+	private void updateDiscountLV(int Snum) {
+		Double discount_Lv = 1.0;
+		Double total_price = 0.0;
 
 		try {
 			Statement stm = conn.createStatement();
@@ -903,9 +1018,9 @@ public class bookshop {
 			if(rs.next()) {
 				try {
 					String value = rs.getString(1);
-					//System.out.println(value);
+					System.out.println(value);
 					if (value == null) {value = "0";}
-					total_price = total_price + Double.parseDouble(value);
+					total_price = Double.parseDouble(value);
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
@@ -1081,6 +1196,55 @@ public class bookshop {
 		}
 	}
 
+	/*** cancelBook ***/
+	private void cancelBook(String Bnum) {
+		try {
+			Statement stm = conn.createStatement();
+			int amount = getBookAmount(Bnum) + 2;
+
+			String sql = "UPDATE BOOK " +
+					"SET AMOUNT = " + amount +
+					" WHERE BNUM = '" + Bnum.toUpperCase() + "'";
+
+			//System.out.println(sql);
+			stm.executeUpdate(sql);
+			stm.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			noException = false;
+		}
+	}
+
+	/*** getBnumByOrderNo ***/
+	private String[] getBnumByOrderNo(String order_no) {
+		String orderedBnum[] = new String[20];
+		int bookNumberCount = 0;
+
+		try {
+			Statement stm = conn.createStatement();
+			String sql = "SELECT BNUM FROM DELIVER"
+					+ " WHERE ORDER_NO = '" + order_no.toUpperCase() + "'";
+			ResultSet rs = stm.executeQuery(sql);
+			while (rs.next()) {
+				try {
+					String value = rs.getString(1);
+					orderedBnum[bookNumberCount] = value;
+					bookNumberCount++;
+//					System.out.println(value);
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			rs.close();
+			stm.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			noException = false;
+		}
+
+		return orderedBnum;
+	}
+
 	/*** ------------------------------------------------ ***/
 
 	/*** main() ***/
@@ -1108,7 +1272,11 @@ public class bookshop {
 //		}
 //	}
 
-	/*** getYESorNO ***/
+	/**
+	 * Get YES or NO. Do not change this function.
+	 *
+	 * @return boolean
+	 */
 	boolean getYESorNO(String message) {
 		JPanel panel = new JPanel();
 		panel.add(new JLabel(message));
@@ -1120,7 +1288,11 @@ public class bookshop {
 		return result;
 	}
 
-	/*** getUsernamePassword ***/
+	/**
+	 * Get username & password. Do not change this function.
+	 *
+	 * @return username & password
+	 */
 	String[] getUsernamePassword(String title) {
 		JPanel panel = new JPanel();
 		final TextField usernameField = new TextField();
@@ -1132,27 +1304,39 @@ public class bookshop {
 		panel.add(passwordField);
 		JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
 			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void selectInitialValue() {
 				usernameField.requestFocusInWindow();
 			}
 		};
+
 		JDialog dialog = pane.createDialog(null, title);
+//		dialog.addWindowListener(new WindowAdapter() {
+//			public void windowClosed(WindowEvent e)
+//			{
+//				System.exit(0);
+//			}
+//		});
 		dialog.setVisible(true);
 		dialog.dispose();
 		return new String[] { usernameField.getText(), new String(passwordField.getPassword()) };
 	}
 
-	/*** loginProxy ***/
+	/**
+	 * Login the proxy. Do not change this function.
+	 *
+	 * @return boolean
+	 */
 	public boolean loginProxy() {
 		if (getYESorNO("Using ssh tunnel or not?")) { // if using ssh tunnel
 			String[] namePwd = getUsernamePassword("Login cs lab computer");
-			String sshUser = namePwd[0];
-			String sshPwd = namePwd[1];
+//			String sshUser = namePwd[0];
+//			String sshPwd = namePwd[1];
+			global_sshUser = namePwd[0];
+			global_sshPwd = namePwd[1];
 			try {
-				proxySession = new JSch().getSession(sshUser, proxyHost, proxyPort);
-				proxySession.setPassword(sshPwd);
+				proxySession = new JSch().getSession(global_sshUser, proxyHost, proxyPort);
+				proxySession.setPassword(global_sshPwd);
 				Properties config = new Properties();
 				config.put("StrictHostKeyChecking", "no");
 				proxySession.setConfig(config);
@@ -1172,18 +1356,23 @@ public class bookshop {
 		return true;
 	}
 
-	/*** boolean ***/
-	/*** Remember to change your password***/
+	/**
+	 * Login the oracle system. Change this function under instruction.
+	 *
+	 * @return boolean
+	 */
 	public boolean loginDB() {
 		String username = "e1234567";//Replace e1234567 to your username
 		String password = "e1234567";//Replace e1234567 to your password
 
 		/* Do not change the code below */
-		if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {
-			String[] namePwd = getUsernamePassword("Login sqlplus");
-			username = namePwd[0];
-			password = namePwd[1];
-		}
+//		if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {
+//			String[] namePwd = getUsernamePassword("Login sqlplus");
+//			username = namePwd[0];
+//			password = namePwd[1];
+			username = global_sshUser;
+			password = global_sshUser; /** Since both the account and password are the ssh account name **/
+//		}
 		String URL = "jdbc:oracle:thin:@" + jdbcHost + ":" + jdbcPort + "/" + database;
 
 		try {
