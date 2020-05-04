@@ -54,8 +54,12 @@ public class bookshop {
 
 	boolean exitFlag = false;
 
+	/*** bookshop ***/
+	/***********************************************************************
+	 * bookshop() is the constructor and prints hello information
+	 **********************************************************************/
 	public bookshop() {
-		System.out.println("Welcome to ABC University Online Bookshop!");
+		System.out.println("Welcome to ABC-Twelve University Online Bookshop!");
 		in = new Scanner(System.in);
 	}
 
@@ -65,7 +69,12 @@ public class bookshop {
 			"3. Order Cancelling"
 	};
 
-	/*** shopMenus **/
+	/*** shopMenus ***/
+	/***********************************************************************
+	 * shopMenus() shows three main functions choices when interacting with
+	 * command line interface
+	 **********************************************************************/
+	/*
 	public String shopMenus() {
 		String menuStr = "";
 		System.out.println("Please choose an action:");
@@ -75,14 +84,12 @@ public class bookshop {
 		}
 		return menuStr;
 	}
-
-	/*** DBExit ***/
-	public boolean DBExit(){
-		boolean myExitFlag = exitFlag;
-		return myExitFlag;
-	}
+	*/
 
 	/*** close ***/
+	/***********************************************************************
+	 * close() log out the database at the end
+	 **********************************************************************/
 	public void close() {
 		System.out.println("Thanks for using this manager! Bye...");
 		try {
@@ -98,10 +105,15 @@ public class bookshop {
 	}
 
 	/*** orderSearch ***/
-	public String orderSearch(String stdNumStr){  //main function 1:
+	/***********************************************************************
+	 * orderSearch() [main function I.1] searches all orders about a student by a student No.
+	 * and passes it into one string
+	 *
+	 * Return: It returns the orders string to caller
+	 **********************************************************************/
+	public String orderSearch(String stdNumStr){
 		/** searchFlag = true: search, searchFlag = false: update **/
-		System.out.println("Please input the Student ID to search order info:");
-//		String line = in.nextLine();
+//		System.out.println("Please input the Student ID to search order info:");
 		String  orderSearchOrUpdatingStr = "";
 		String line = null;
 		line = stdNumStr;
@@ -117,7 +129,6 @@ public class bookshop {
 				orderSearchOrUpdatingStr = "Student number not found!";
 				return orderSearchOrUpdatingStr;
 			}
-
 		}
 
 		orderSearchOrUpdatingStr = "Your input student ID is null value.";
@@ -125,7 +136,14 @@ public class bookshop {
 	}
 
 	/*** orderDateUpdate ***/
-	public boolean orderDateUpdate(String orderNumStr, String bookNumStr, String dateUpdtStr){  //main function 1:
+	/***********************************************************************
+	 * orderDateUpdate() [main function I.2] updates an order by order No.,
+	 * book No. and date.
+	 *
+	 * Return: It passes a boolean value to indicate whether the process
+	 * is successful to caller
+	 **********************************************************************/
+	public boolean orderDateUpdate(String orderNumStr, String bookNumStr, String dateUpdtStr){
 		String line1, line2, line3, line4;
 		line1 = orderNumStr;
 		line2 = bookNumStr;
@@ -133,98 +151,56 @@ public class bookshop {
 
 		line1 = line1.trim();
 		/** order date updating **/
-
-					System.out.println("admin logged in!");
-
-					System.out.println("admin function:");
-
-					/** ---- **/
-					System.out.println("1. Show all orders");
-					System.out.println("2. Show orders by student ID");
-					/** ---- **/
-
-					System.out.println("3. Update Order");
-					System.out.println("4. Back to main menu");
-
-
-					System.out.println("Please input order number:");
-//										String Order_no = in.nextLine();
 					String Order_no = line1;
-
 					Order_no = Order_no.trim();
-					System.out.println("Please input book Number:");
 
-//										String Book_no = in.nextLine();
 					String Book_no = line2;
-
 					Book_no = Book_no.trim();
-
-					if(!printOrderByOrderNoAndBnum(Order_no,Book_no))
-						return false;
-
-					System.out.println("Update this record? (Yes / No):");
-
-					System.out.println("Please input a date (dd/mm/yyyy)");
-//													String date = in.nextLine();
 
 					String date = line3;
 					date = date.trim();
 
+					if(!checkUpdatedDeliveryDate(orderNumStr, dateUpdtStr)){
+						return false;
+					}
+
+					if(!printOrderByOrderNoAndBnum(Order_no,Book_no))
+						return false;
+
 					if(!updateDeliveryDate(Order_no, Book_no, date))
 						return false;
 
-					System.out.println("Updated record!");
-
+					/** return true **/
 					return true;
 	}
 
 	/*** orderMaking ***/
-	public String orderMaking(String stdNumStr, String bookNumStr, int paymentChoice, String paymentCardNumber) {  //main function 2:
+	/***********************************************************************
+	 * orderMaking() [main function II] inserts a valid record into Place_Order
+	 * table. A string stores console information.
+	 *
+	 * Return: It passes the console information string to caller
+	 **********************************************************************/
+	public String orderMaking(String stdNumStr, String bookNumStr, int paymentChoice, String paymentCardNumber) {
 
 		String orderConfirmInfoStr = "";
-
-		int choice = paymentChoice;
+		String line = stdNumStr;
+		String checkOrder = null;
 		String cardNumber = paymentCardNumber;
+		int choice = paymentChoice;
+
+		/*
 		System.out.println("--------------Order making requirements--------------");
 		System.out.println("I. Every book in the order is NOT out of stock");
 		System.out.println("II. Not have any outstanding orders(All books ordered earlier had been delivered)");
 		System.out.println("-----------------------------------------------------");
-//        while (choice != 3) {
-		System.out.println("Please choose an action:");
-		System.out.println("1. Display list of books.");
-		System.out.println("2. Make a new order.");
-		System.out.println("3. Back to main menus.");
-//		String line = in.nextLine();
+		*/
 
-//		choice = Integer.parseInt(line);
-
-		//            if (choice == 1) {
-		//                //print book table
-		//                printBookList();
-		//            }else if (choice == 2) {
-		System.out.println("Please input your student number!");
-
-		//check outstanding order
-		//                            line = in.nextLine();
-
-		String line = stdNumStr;
 		line = line.trim();
-
-//		if (line.equalsIgnoreCase("exit"))
-//			return null;
-
 		int Snum = Integer.parseInt(line);
-
-		String checkOrder = null;
 		checkOrder = checkNextOrder(Snum);
-		if (!checkOrder.contains("Yes")){
-			return checkOrder;
-		}
 
-		//making order
-		System.out.println("Please input book number:");
-		System.out.println("(If more than 1 book, please input by following format: book1,book2,book3)");
-		//                            line = in.nextLine();
+		if (!checkOrder.contains("Yes")){ return checkOrder; }
 
 		line = bookNumStr;
 		String[] Bnum = line.split(",");
@@ -242,32 +218,26 @@ public class bookshop {
 
 			if (i > 0)
 				book_name = book_name + ", " + getBookName(Bnum[i]);
-			//System.out.println("Book number:" + Bnum[i]);
 		}
 		System.out.println("Book ordered:" + book_name);
-
 		orderConfirmInfoStr += "Book ordered:" + book_name + "\n";
 
-		//display total price
+		/** display total price **/
 		double total_price = calTotalPrice(Snum,Bnum);
 		System.out.println("Total price: $" + (total_price));
-
 		orderConfirmInfoStr += "Total price: $" + (total_price) + "\n";
 
-		//ask for payment method
+		/** ask for payment method **/
 		String[] payment_Method = new String[2];
 		payment_Method = getPaymentMethod(choice, cardNumber);
 
-
-		//create order_no
+		/** create order_no **/
 		String order_no = getNextOrderNo();
-		//System.out.println(order_no);
 
-		//take current time
+		/** get current time **/
 		String order_date = getCurrentDate();
-		//System.out.println(order_date);
 
-		//Insert record into PLACE_ORDER TABLE
+		/** insert record into Place_Order table **/
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "INSERT INTO PLACE_ORDER VALUES(" + "'" + order_no + "', " +
@@ -275,86 +245,68 @@ public class bookshop {
 					"TO_DATE('" + order_date + "', 'dd/mm/yyyy:hh24/mi/ss'), " +
 					"'" + book_name + "', " +
 					total_price + "," +
-					"'" + payment_Method[0] + "', " +
-					"'" + payment_Method[1] + "')";
+					"'" + payment_Method[0] + "', "
+					 + payment_Method[1] + ")";
 			//System.out.println(sql);
 			stm.executeUpdate(sql);
 			stm.close();
-
 		} catch (SQLException e1) {
-			e1.printStackTrace();
 			noException = false;
-		}
-		//Insert finish
+			e1.printStackTrace();
+			do {
+				System.out.println("SQL STATE: " + e1.getSQLState());
+				System.out.println("ERROR CODE: " + e1.getErrorCode());
+				System.out.println("MESSAGE: " + e1.getMessage());
+				System.out.println();
+				e1 = e1.getNextException();
+				return "Order failed. Your card No. is missing or in a wrong format!\nPlease enter a correct card number.";
+			}
+			while (e1 != null);
 
-		//Update Book stocks
+		}
+
+		/** update book stocks **/
 		for (int i = 0; i < Bnum.length; ++i) {
 			updateBookStock(Bnum[i]);
 		}
-		//Finish update
 
-		//Update discount_lv into Student Table
-		updateDiscountLV(Snum);
-		//Update finish
+		//
+		/** update discount level into Student table **/
+//		updateDiscountLV(Snum);
 
-		//Update Deliver Table
+		/** update Deliver table **/
 		for (int i = 0; i < Bnum.length; ++i) {
 			updateDeliver(order_no,Bnum[i]);
 		}
 
 		System.out.println("Succeed to make order! ");
-
 		orderConfirmInfoStr += "Succeed to make order! \n";
 
+		/** pass console string **/
 		return orderConfirmInfoStr;
-
-		//            }else if(choice == 3){
-		//                continue;
-		//            }else {
-		//                System.out.println("Enter wrong number!");
-		//            }
-//        }
 	}
 
 	/*** orderCancelling ***/
-	public String orderCancelling(String orderNum) {  //main function 3:
+	/***********************************************************************
+	 * orderCancelling() [main function III] cancels a valid record from Place_Order
+	 * table. A string stores console information.
+	 *
+	 * Return: It passes the console information string to caller
+	 **********************************************************************/
+	public String orderCancelling(String orderNum) {
 		String orderCancellingInfoStr = null;
 		String anOrderStr = null;
 
+		/*
 		System.out.println("------------Order cancelling requirements------------");
 		System.out.println("I. None of the books in the order has been delivered");
 		System.out.println("II. Order was made within 7 days");
 		System.out.println("-----------------------------------------------------");
-		System.out.println("Please input the Student ID or type 'exit' back to main menu:");
-//		String line = in.nextLine();
-//		line = line.trim();
-//		System.out.println(line);
-//		if (line.equalsIgnoreCase("exit"))
-//			return null;
-
-//		int snum = Integer.parseInt(line);
-//		boolean checkNo = checkSnum(snum);
-//		if (checkNo == true) {
-//			System.out.println("-----------------------------------------------------");
-//			System.out.println("--------------Display all order records--------------");
-//			System.out.println("-----------------------------------------------------");
-//			printOrderBySnum(snum);
-//		}
-
-		System.out.println("Please enter an order number to finish order cancelling:");
-//		String order_no = in.nextLine();
+		*/
 		String order_no = orderNum;
 		order_no = order_no.trim();
 
-//		anOrderStr = printOrderByOrderNo(order_no);
-
-		System.out.println("Cancel this order? (Yes / No):");
-//        String orderCancelChoice = in.nextLine();
-
-//        orderCancelChoice = orderCancelChoice.trim();
-//        if(orderCancelChoice.equalsIgnoreCase("yes")) {
-
-		//check at least order book delivered or not
+		/** check at least order book delivered or not **/
 		if (checkOrderDelivered(order_no) == false) {
 			System.out.println("Order cancelling failed!");
 			System.out.println("Some book of this order had been delivered!");
@@ -362,6 +314,7 @@ public class bookshop {
 			return orderCancellingInfoStr;
 		}
 
+		/** check at within-7-days constraint **/
 		if (checkOrderDateWithin7(order_no) == false) {
 			System.out.println("Order cancelling failed!");
 			System.out.println("Order made before 7 days!");
@@ -369,46 +322,110 @@ public class bookshop {
 			return orderCancellingInfoStr;
 		}
 
+		/** get student No. by order No. **/
 		String snum = getStudentNum(order_no);
 
+		/** check student NO.'s validation **/
 		if(snum == null){
 			System.out.println("Get student ID error! We cannot update the discount level.");
 			orderCancellingInfoStr = "Get student ID error! We cannot update the discount level.";
 			return orderCancellingInfoStr;
 		}
 
-		String[] orderBnums = getBnumByOrderNo(order_no); /** 1 **/
-
+		/** cancel book orders and update the book stock into Book table **/
+		String[] orderBnums = getBnumByOrderNo(order_no);
 		for (int i = 0; orderBnums[i] != null; i++)
 		{
-//				System.out.println(orderBnum[i]);
-			if(!cancelBook(orderBnums[i]))  /** new 2 **/
+			if(!cancelBook(orderBnums[i]))
 				return "Cannot cancel book orders!";
 		}
 
+		/** cancel orders from Place_Order table **/
 		if(!cancelOrder(order_no)){
 			orderCancellingInfoStr = "Order cancelling failed\n";
 			return orderCancellingInfoStr;
 		}
 
-		updateDiscountLV(Integer.parseInt(snum)); /** new 3 **/
-
-//		System.out.println("cancelBook invoked.");
+		/** updates discount level **/
+//		updateDiscountLV(Integer.parseInt(snum));
 
 		System.out.println("Successfully cancel the order!");
-
 		orderCancellingInfoStr = "Successfully cancel the order!\n";
 
-//        }else if(orderCancelChoice.equalsIgnoreCase("no")) {
-//
-//        }else {
-//
-//        }
+		/** pass console string to caller **/
 		return orderCancellingInfoStr;
 
 	}
 
+	/*** checkUpdatedDeliveryDate ***/
+	/***********************************************************************
+	 * checkUpdatedDeliveryDate() check whether the updated delivery date
+	 * is earlier than the order date.
+	 *
+	 * Return: false if the updated delivery date is earlier than
+	 * the order date, true otherwise
+	 **********************************************************************/
+	private boolean checkUpdatedDeliveryDate(String orderNumStr, String updatedDeliveryDate){
+		String newOrderNumStr = orderNumStr;
+		String newDeliveryDate = updatedDeliveryDate;
+
+		newOrderNumStr = newOrderNumStr.trim();
+		newDeliveryDate = newDeliveryDate.trim();
+
+		try {
+			Statement stm = conn.createStatement();
+			String sql = "SELECT ORDER_DATE"
+					+ " FROM PLACE_ORDER"
+					+ " WHERE ORDER_NO = '" + newOrderNumStr + "'";
+			ResultSet rs = stm.executeQuery(sql);
+
+			while (rs.next()) {
+				try {
+					try {
+						String value = rs.getString(1);
+						DateFormat dbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						DateFormat currentDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+						value = value.substring(0, 19);
+
+						Date orderDate = dbDateFormat.parse(value);
+						String OrderDateTransfer = currentDateFormat.format(orderDate);
+						Date newOrderDate = currentDateFormat.parse(OrderDateTransfer);
+
+						newDeliveryDate = newDeliveryDate + " 00:00:00.0";
+						Date currentNewDeliveryDate = currentDateFormat.parse(newDeliveryDate);
+
+						if(newOrderDate.compareTo(currentNewDeliveryDate) > 0){
+							System.out.println("Books delivery date cannot be earlier than the order date!");
+							System.out.println("Delivery date updating failed!");
+
+							//						checkOrderStr = "Books delivery date cannot be earlier than the order date!\n";
+							//						checkOrderStr += "Delivery date updating failed!\n";
+							rs.close();
+							stm.close();
+							return false;
+						}
+					} catch (ParseException e) {
+						noException = false;
+						e.printStackTrace();
+					}
+				} catch (SQLException e) {
+					noException = false;
+					e.printStackTrace();
+				}
+			}
+			rs.close();
+			stm.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			noException = false;
+		}
+		return true;
+	}
+
 	/*** getStudentNum ***/
+	/***********************************************************************
+	 * orderCancelling() returns student No. by order No.
+	 **********************************************************************/
 	public String getStudentNum(String orderNum){
 		String order_no = orderNum;
 		order_no = order_no.trim();
@@ -441,6 +458,9 @@ public class bookshop {
 	}
 
 	/*** printAllOrders ***/
+	/***********************************************************************
+	 * printAllOrders() returns all order records
+	 **********************************************************************/
 	public String printAllOrders() {
 		String allOrdersStr = "";
 		try {
@@ -463,7 +483,6 @@ public class bookshop {
 				System.out.println("-------------------------");
 				allOrdersStr += "-------------------------\n";
 			}
-
 			rs.close();
 			stm.close();
 			return allOrdersStr;
@@ -475,30 +494,37 @@ public class bookshop {
 	}
 
 	/*** printOrderBySnum ***/
+	/***********************************************************************
+	 * printAllOrders() returns all order records via a string
+	 **********************************************************************/
 	private String printOrderBySnum(int Snum) {
 		String orderStr = "";
 		String orderNum = null;
 		double discount_lv = 0.0;
 		try {
-			String[] heads1 = { "Student_ID", "Name", "Gender", "Major", "Discount_Level"};
+			String[] heads1 = { "Student_ID", "Name", "Gender", "Major", "Total_Ordered", "Discount_Level"};
 
 			String[] heads2 = { "Order_Number", "Student", "Order_Date", "Books_Title", "Price", "Bnum", "Payment_method", "Card_No", "Deliver_Date"};
 
 			Statement stm = conn.createStatement();
 
 			String sql =
-					"SELECT SNUM, NAME, GENDER, MAJOR, DISCOUNT_LEVEL"
+					"SELECT SNUM, NAME, GENDER, MAJOR, TOTAL_ORDERED, DISCOUNT_LEVEL"
 							+ " FROM STUDENT"
 							+ " WHERE SNUM = " + Snum;
 			ResultSet rs = stm.executeQuery(sql);
 			while (rs.next()) {
-				for (int i = 0; i < heads1.length; ++i) { //Print 5 attributes from PLACE_ORDER + DELIVER
+				for (int i = 0; i < heads1.length; ++i) { //Print 6 attributes from PLACE_ORDER + DELIVER
 					try {
 						String value = rs.getString( i + 1 );
 						if (value == null) {value = "";}
-						if(heads1[i].contains("Discount_Level")){
-							discount_lv = Double.parseDouble(value);
-						}
+//						if(heads1[i].contains("Discount_Level")){
+//							if(value == null || value.equals("")){
+//								discount_lv = 1.0;
+//							}else{
+//								discount_lv = Double.parseDouble(value);
+//							}
+//						}
 						System.out.println(heads1[i] + " : " + value);
 						orderStr += heads1[i] + " : " + value + "\n";
 					} catch (SQLException e) {
@@ -526,15 +552,22 @@ public class bookshop {
 
 						if(heads2[i].contains("Books_Title")){
 							System.out.println(heads2[i] + " : " + value);
-							orderStr += heads2[i] + " : " + value;
+//							orderStr += heads2[i] + " : " + value;
+							orderStr += heads2[i] + " : " + value + "\n";
 						}else if(heads2[i].contains("Price")){
 
 							double calculateDiscount = singleBookDiscount(orderNum); /** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! **/
 
 							System.out.println(heads2[i] + " : " + (calculateDiscount*Double.parseDouble(value)));
 							orderStr += heads2[i] + " : " + (calculateDiscount * Double.parseDouble(value)) + "\n";
+						}else if(heads2[i].contains("Card_No")){
+								if(!value.equals("")){
+									System.out.println(heads2[i] + " : " + value);
+									orderStr += heads2[i] + " : " + value + "\n";
+								}
 						}
 						else{
+							System.out.println(heads2[i] + " : " + value);
 							orderStr += heads2[i] + " : " + value + "\n";
 						}
 					} catch (SQLException e) {
@@ -554,7 +587,11 @@ public class bookshop {
 		}
 	}
 
-	/*** printOrderByOrderNoAndBnum ***/
+	/*** singleBookDiscount ***/
+	/***********************************************************************
+	 * singleBookDiscount() returns a discount level calculated by a single order
+	 * Default: 1.0
+	 **********************************************************************/
 	private double singleBookDiscount(String orderNum){
 		double totalPrice = 0.0;
 		try {
@@ -610,17 +647,21 @@ public class bookshop {
 	}
 
 	/*** printOrderByOrderNoAndBnum ***/
+	/***********************************************************************
+	 * printOrderByOrderNoAndBnum() prints orders by student No. and Book No.
+	 **********************************************************************/
 	private boolean printOrderByOrderNoAndBnum(String Order_no, String Bnum) {
 		try {
 			Statement stm = conn.createStatement();
-			String sql = "SELECT ORDER_NO, DELIVER.BNUM, BOOK.TITLE, DELIVERY_DATE FROM DELIVER, BOOK"
+			String sql = "SELECT ORDER_NO, DELIVER.BNUM, BOOK.TITLE, DELIVERY_DATE"
+					+ " FROM DELIVER, BOOK"
 					+ " WHERE ORDER_NO = '" + Order_no.toUpperCase() + "'"
 					+ " AND DELIVER.BNUM = '" + Bnum.toUpperCase() + "'"
 					+ " AND BOOK.BNUM = DELIVER.BNUM";
 			ResultSet rs = stm.executeQuery(sql);
 			String[] heads = { "Order_Number", "Book_Number", "Book_Name", "Deliver_Date"};
 			while (rs.next()) {
-				for (int i = 0; i < 4; ++i) { //Print 3 attributes from PLACE_ORDER + DELIVER
+				for (int i = 0; i < heads.length; ++i) { //Print 4 attributes from PLACE_ORDER + DELIVER
 					try {
 						String value = rs.getString( i + 1 );
 						if (value == null) {value = "";}
@@ -643,6 +684,11 @@ public class bookshop {
 	}
 
 	/*** updateDeliveryDate ***/
+	/***********************************************************************
+	 * updateDeliveryDate() updates delivery date into Delivery table
+	 *
+	 * Return: true if update successfully, false if the updating is failed
+	 **********************************************************************/
 	public boolean updateDeliveryDate(String order_no, String Bnum, String date) {
 		try {
 			Statement stm = conn.createStatement();
@@ -663,6 +709,11 @@ public class bookshop {
 	}
 
 	/*** checkSnum ***/
+	/***********************************************************************
+	 * checkSnum() checks whether a student No. is valid
+	 *
+	 * Return: true if valid, false otherwise
+	 **********************************************************************/
 	private boolean checkSnum(int Snum) {
 		try {
 			Statement stm = conn.createStatement();
@@ -685,6 +736,13 @@ public class bookshop {
 	}
 
 	/*** checkNextOrder ***/
+	/***********************************************************************
+	 * checkNextOrder() checks whether any undelivered book exists
+	 *
+	 * Return: a console string
+	 * I. "Yes" to indicate no undelivered book exists
+	 * II. Other strings: error messages
+	 **********************************************************************/
 	private String checkNextOrder(int Snum) {
 		String checkOrderStr = null;
 		try {
@@ -692,15 +750,11 @@ public class bookshop {
 				return "Student number not found!";
 			}
 
-//			System.out.println("getCurrentDate(): " + getCurrentDate());
-
-
 			Statement stm = conn.createStatement();
 			String sql = "SELECT DELIVERY_DATE"
 					+ " FROM PLACE_ORDER,DELIVER WHERE STUDENT = " + Snum
 					+ " AND PLACE_ORDER.ORDER_NO = DELIVER.ORDER_NO";
 			ResultSet rs = stm.executeQuery(sql);
-
 
 			while (rs.next()) {
 				try {
@@ -708,10 +762,8 @@ public class bookshop {
 					if (value == null) { /** When the value is null, it means delivery_date has not set yet **/
 						System.out.println("Books ordered earlier hadn't been delivered!");
 						System.out.println("New order making failed!");
-
 						checkOrderStr = "Books ordered earlier hadn't been delivered!\n";
 						checkOrderStr += "New order making failed!\n";
-
 						rs.close();
 						stm.close();
 						return checkOrderStr;
@@ -756,6 +808,9 @@ public class bookshop {
 	}
 
 	/*** printBookList ***/
+	/***********************************************************************
+	 * printBookList() returns all book stock from Book table by a string
+	 **********************************************************************/
 	public String printBookList() {
 		String bookListStr = "";
 		System.out.println("The book inside bookshop are:");
@@ -790,6 +845,13 @@ public class bookshop {
 	}
 
 	/*** checkBookAmount ***/
+	/***********************************************************************
+	 * checkBookAmount() checks stock of one book
+	 *
+	 * Return (string):
+	 * I. "Yes": available
+	 * II. Other strings: error messages
+	 **********************************************************************/
 	private String checkBookAmount(String Bnum) {
 		String bookAmountStr = null;
 		try {
@@ -828,6 +890,9 @@ public class bookshop {
 	}
 
 	/*** getBookName ***/
+	/***********************************************************************
+	 * getBookName() returns book's name by book No.
+	 **********************************************************************/
 	private String getBookName(String Bnum) {
 		String bookname = null;
 		try {
@@ -853,6 +918,10 @@ public class bookshop {
 	}
 
 	/*** calTotalPrice ***/
+	/***********************************************************************
+	 * calTotalPrice() returns the total price of all books in an order
+	 * by a student No. and book No.s
+	 **********************************************************************/
 	private double calTotalPrice(int Snum, String[] Bnum) {
 		double total_price = 0.0;
 		double discount_lv = 1.0;
@@ -904,28 +973,31 @@ public class bookshop {
 	}
 
 	/*** getPaymentMethod ***/
+	/***********************************************************************
+	 * getPaymentMethod() returns payment methods
+	 * If the method is card, it contains a card No.
+	 **********************************************************************/
 	private String[] getPaymentMethod(int choice, String cardNumber) {
+		/*
 		System.out.println("Please choose a payment method!");
 		System.out.println("1. Cash");
 		System.out.println("2. Credit Card");
-		System.out.println("3. Bank transfer"); /** ? - error **/
+		System.out.println("3. Bank transfer");
+		*/
 
 		String[] paymentMethod = new String[2];
 		paymentMethod[0] = "CASH";
 		paymentMethod[1] = "NULL";
 
-//		String line = in.nextLine();
-//		int payment_choice = Integer.parseInt(line);
-
 		int payment_choice = choice;
 
 		if (payment_choice == 2) {
 			paymentMethod[0] = "CARD";
-			System.out.println("Please input credit card number!");
-//			paymentMethod[1] = in.nextLine();
+//			System.out.println("Please input credit card number!");
 			paymentMethod[1] = cardNumber;
-			paymentMethod[1] = paymentMethod[1].trim();
+			if(paymentMethod[1] != null){paymentMethod[1] = paymentMethod[1].trim();}
 		}
+
 		if (payment_choice == 3) {
 			paymentMethod[0] = "BANK_TRANSFER";
 		}
@@ -934,6 +1006,9 @@ public class bookshop {
 	}
 
 	/*** getNextOrderNo ***/
+	/***********************************************************************
+	 * getNextOrderNo() returns (creates) a new order No.
+	 **********************************************************************/
 	private String getNextOrderNo() {
 		String order_no = null;
 
@@ -962,11 +1037,13 @@ public class bookshop {
 			e1.printStackTrace();
 			noException = false;
 		}
-
 		return order_no;
 	}
 
 	/*** getCurrentDate ***/
+	/***********************************************************************
+	 * getCurrentDate() returns current date
+	 **********************************************************************/
 	private String getCurrentDate() {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Date date = new Date();
@@ -976,6 +1053,9 @@ public class bookshop {
 	}
 
 	/*** getBookAmount ***/
+	/***********************************************************************
+	 * getBookAmount() returns stock of one book by a book No.
+	 **********************************************************************/
 	private int getBookAmount(String Bnum) {
 		int amount = 0;
 		try {
@@ -1002,10 +1082,16 @@ public class bookshop {
 	}
 
 	/*** updateBookStock ***/
+	/***********************************************************************
+	 * updateBookStock() updates book stock by a book No.
+	 **********************************************************************/
 	private void updateBookStock(String Bnum) {
 		try {
 			Statement stm = conn.createStatement();
 			int amount = getBookAmount(Bnum);
+
+			/** Since the book amount has been subtracted 1 from getBookAmount()
+			 * it doesn't add 1 any more **/
 
 			String sql = "UPDATE BOOK " +
 					"SET AMOUNT = " + amount +
@@ -1018,10 +1104,13 @@ public class bookshop {
 			e1.printStackTrace();
 			noException = false;
 		}
-
 	}
 
 	/*** updateDiscountLV ***/
+	/***********************************************************************
+	 * updateDiscountLV() updates discount level by a student No.
+	 **********************************************************************/
+	/*
 	private void updateDiscountLV(int Snum) {
 		Double discount_Lv = 1.0;
 		Double total_price = 0.0;
@@ -1065,7 +1154,13 @@ public class bookshop {
 
 	}
 
+	 */
+
 	/*** updateDeliver ***/
+	/***********************************************************************
+	 * updateDeliver() updates delivery date into Deliver table
+	 * by order No. and book No.
+	 **********************************************************************/
 	private void updateDeliver(String order_no, String Bnum) {
 		try {
 			Statement stm = conn.createStatement();
@@ -1082,6 +1177,9 @@ public class bookshop {
 	}
 
 	/*** printOrderByOrderNo ***/
+	/***********************************************************************
+	 * printOrderByOrderNo() returns an order information string by an order No.
+	 **********************************************************************/
 	public String printOrderByOrderNo (String Order_no) {
 		String orderInfoStr = "";
 		String orderNumLine = Order_no;
@@ -1119,6 +1217,10 @@ public class bookshop {
 	}
 
 	/*** checkOrderDelivered ***/
+	/***********************************************************************
+	 * checkOrderDelivered() returns true is all orders have been delivered,
+	 * otherwise returns false
+	 **********************************************************************/
 	private boolean checkOrderDelivered(String order_no) {
 		try {
 			Statement stm = conn.createStatement();
@@ -1145,6 +1247,10 @@ public class bookshop {
 	}
 
 	/*** checkOrderDateWithin7 ***/
+	/***********************************************************************
+	 * checkOrderDateWithin7() returns true if an order is within seven days,
+	 * otherwise return false
+	 **********************************************************************/
 	private boolean checkOrderDateWithin7 (String order_no) {
 		try {
 			Statement stm = conn.createStatement();
@@ -1197,6 +1303,11 @@ public class bookshop {
 	}
 
 	/*** cancelOrder ***/
+	/***********************************************************************
+	 * cancelOrder() returns true if successfully delete an order from
+	 * Place_Order table by an order No.
+	 * Otherwise return false
+	 **********************************************************************/
 	private boolean cancelOrder(String order_no) {
 		try {
 			Statement stm = conn.createStatement();
@@ -1215,6 +1326,11 @@ public class bookshop {
 	}
 
 	/*** cancelBook ***/
+	/***********************************************************************
+	 * cancelBook() returns true if successfully delete a delivery record
+	 * from Book table by a book No.
+	 * Otherwise return false
+	 **********************************************************************/
 	private boolean cancelBook(String Bnum) {
 		try {
 			Statement stm = conn.createStatement();
@@ -1236,6 +1352,9 @@ public class bookshop {
 	}
 
 	/*** getBnumByOrderNo ***/
+	/***********************************************************************
+	 * getBnumByOrderNo() returns a book No. by an order No.
+	 **********************************************************************/
 	private String[] getBnumByOrderNo(String order_no) {
 
 		String orderedBnum[] = new String[20];
@@ -1325,19 +1444,13 @@ public class bookshop {
 		panel.add(passwordField);
 		JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
 			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void selectInitialValue() {
 				usernameField.requestFocusInWindow();
 			}
 		};
-
 		JDialog dialog = pane.createDialog(null, title);
-//		dialog.addWindowListener(new WindowAdapter() {
-//			public void windowClosed(WindowEvent e)
-//			{
-//				System.exit(0);
-//			}
-//		});
 		dialog.setVisible(true);
 		dialog.dispose();
 		return new String[] { usernameField.getText(), new String(passwordField.getPassword()) };
@@ -1351,13 +1464,11 @@ public class bookshop {
 	public boolean loginProxy() {
 		if (getYESorNO("Using ssh tunnel or not?")) { // if using ssh tunnel
 			String[] namePwd = getUsernamePassword("Login cs lab computer");
-//			String sshUser = namePwd[0];
-//			String sshPwd = namePwd[1];
-			global_sshUser = namePwd[0];
-			global_sshPwd = namePwd[1];
+			String sshUser = namePwd[0];
+			String sshPwd = namePwd[1];
 			try {
-				proxySession = new JSch().getSession(global_sshUser, proxyHost, proxyPort);
-				proxySession.setPassword(global_sshPwd);
+				proxySession = new JSch().getSession(sshUser, proxyHost, proxyPort);
+				proxySession.setPassword(sshPwd);
 				Properties config = new Properties();
 				config.put("StrictHostKeyChecking", "no");
 				proxySession.setConfig(config);
@@ -1387,17 +1498,15 @@ public class bookshop {
 		String password = "e1234567";//Replace e1234567 to your password
 
 		/* Do not change the code below */
-//		if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {
-//			String[] namePwd = getUsernamePassword("Login sqlplus");
-//			username = namePwd[0];
-//			password = namePwd[1];
-			username = global_sshUser;
-			password = global_sshUser; /** Since both the account and password are the ssh account name **/
-//		}
+		if(username.equalsIgnoreCase("e1234567") || password.equalsIgnoreCase("e1234567")) {
+			String[] namePwd = getUsernamePassword("Login sqlplus");
+			username = namePwd[0];
+			password = namePwd[1];
+		}
 		String URL = "jdbc:oracle:thin:@" + jdbcHost + ":" + jdbcPort + "/" + database;
 
 		try {
-			//System.out.println("Logging " + URL + " ...");
+			System.out.println("Logging " + URL + " ...");
 			conn = DriverManager.getConnection(URL, username, password);
 			return true;
 		} catch (SQLException e) {
@@ -1407,6 +1516,10 @@ public class bookshop {
 	}
 
 	/*** auTologinProxy ***/
+	/***********************************************************************
+	 * auTologinProxy() automatically fill in account number and password
+	 * when login. It is only for testing.
+	 **********************************************************************/
 	public boolean auTologinProxy() {
 		String sshUser = global_sshUser;  //Change login ac
 		String sshPwd = global_sshPwd;

@@ -35,6 +35,8 @@ public class GUI_Core {
 
     public bookshop managerDB;
 
+    final String errorInfo = "Exception:\n---------------------------\n---------------------------\n";
+
     public GUI_Core() {}
 
     private void initialize() {
@@ -73,12 +75,12 @@ public class GUI_Core {
 
         orderSearchingLabel = new JLabel("Order Searching/Updating (dd/mm/yyyy): ");
         orderSearchingLabel.setFont(myFt);
-        orderSearchingLabel.setBounds(330, 190, 290, 19);    /***209, 16, 101, 15 ***/
+        orderSearchingLabel.setBounds(330, 190, 330, 19);    /***209, 16, 101, 15 ***/
         majorFrame.getContentPane().add(orderSearchingLabel);
 
-        orderMakingLabel = new JLabel("Order Making: ");
+        orderMakingLabel = new JLabel("Order Making: (using ',' to divide book No.)");
         orderMakingLabel.setFont(myFt);
-        orderMakingLabel.setBounds(330, 265, 151, 19);    /***209, 16, 101, 15 ***/
+        orderMakingLabel.setBounds(330, 265, 330, 19);    /***209, 16, 101, 15 ***/
         majorFrame.getContentPane().add(orderMakingLabel);
 
         orderCancelingLabel = new JLabel("Order Canceling: ");
@@ -126,7 +128,7 @@ public class GUI_Core {
         stdOrderMakingTextField.setColumns(20);
 
         bookNumOrderMakingTextField = new JTextField();
-        PromptSupport.setPrompt("  ... book No. ... ", bookNumOrderMakingTextField);
+        PromptSupport.setPrompt("using ',' to divide book No. ", bookNumOrderMakingTextField);
         bookNumOrderMakingTextField.setBounds(468, 290, 137, 19); /***328, 12, 114, 19**/
         majorFrame.getContentPane().add(bookNumOrderMakingTextField);
         bookNumOrderMakingTextField.setColumns(20);
@@ -341,7 +343,7 @@ public class GUI_Core {
         consoleBoxTextArea = new JTextArea();
         consoleBoxTextArea.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
         consoleBoxTextArea.setFont(myFt);
-        consoleBoxTextArea.setBounds(10, 215, 293, 221);
+        consoleBoxTextArea.setBounds(10, 215, 307, 231);
         consoleBoxTextArea.setLineWrap(true);
         consoleBoxTextArea.setWrapStyleWord(true);
 
@@ -357,13 +359,11 @@ public class GUI_Core {
 
     /*** ---------------------------------------------------------------------------------------------------------- ***/
 
-    /*** consoleBoxSetText ***/
-    public void consoleBoxSetText(String str){
-        consoleBoxTextArea.setText(str);
-    }
-    public void allBooksSetText(String str){ allBooksTextArea.setText(str); }
-    public void allOrdersBoxSetText(String str){ allOrdersBoxTextArea.setText(str); }
-
+    /************************** bookStoreRecordInfo ***/
+    /***********************************************************************
+     * bookStoreRecordInfo() displays rules about order date updating and
+     *  order cancelling
+     **********************************************************************/
     public void bookStoreRecordInfo(){
         String info = "";
         info += "Welcome to the Online Book Store - Group Twelve! Please follow the instruction to check the record:\n\n";
@@ -384,7 +384,32 @@ public class GUI_Core {
         consoleBoxSetText(info);
     }
 
+
+    /************************** consoleBoxSetText ***/
+    /***********************************************************************
+     * consoleBoxSetText() sets text into consoleBoxTextArea
+     **********************************************************************/
+    public void consoleBoxSetText(String str){
+        consoleBoxTextArea.setText(str);
+    }
+
+    /*** allBooksSetText ***/
+    /***********************************************************************
+     * allBooksSetText() sets text into allBooksTextArea
+     **********************************************************************/
+    public void allBooksSetText(String str){ allBooksTextArea.setText(str); }
+
+    /*** allOrdersBoxSetText ***/
+    /***********************************************************************
+     * allOrdersBoxSetText() sets text into allOrdersBoxTextArea
+     **********************************************************************/
+    public void allOrdersBoxSetText(String str){ allOrdersBoxTextArea.setText(str); }
+
     /*** getAllBooks ***/
+    /***********************************************************************
+     * getAllBooks() gets all the book records from Book table in
+     * database and pass a string to allBooksSetText()
+     **********************************************************************/
     public void getAllBooks(){
         String bookListStr = "";
         bookListStr = managerDB.printBookList();
@@ -392,6 +417,10 @@ public class GUI_Core {
     }
 
     /*** getAllOrders ***/
+    /***********************************************************************
+     * getAllOrders() gets all the order records from Place_Order table
+     * in database and pass a string to allOrdersBoxSetText()
+     **********************************************************************/
     public void getAllOrders(){
         String allOrdersStr = null;
         allOrdersStr = managerDB.printAllOrders();
@@ -403,20 +432,45 @@ public class GUI_Core {
     }
 
     /*** getAnOrder ***/
+    /***********************************************************************
+     * getAnOrder() gets one order record from Place_Order table
+     * in database by a order No. and pass a string to consoleBoxSetText()
+     **********************************************************************/
     public void getAnOrder(){
         String ordersStr;
-        ordersStr = managerDB.printOrderByOrderNo(orderCancelingTextField.getText());
-        consoleBoxSetText(ordersStr);
+        String orderTextFieldStr = orderCancelingTextField.getText();
+        if(orderTextFieldStr.equals("")){
+            consoleBoxSetText(errorInfo + "Your order No. is empty!\nPlease enter a correct order No..");
+        }else{
+            ordersStr = managerDB.printOrderByOrderNo(orderTextFieldStr);
+            consoleBoxSetText(ordersStr);
+        }
+
     }
 
     /*** orderSearching ***/
+    /***********************************************************************
+     * orderSearching() gets all order records from Place_Order table
+     * in database by a student No. and pass a string to consoleBoxSetText()
+     **********************************************************************/
     public void orderSearching(){
         String orderInfoStr = "";
-        orderInfoStr = managerDB.orderSearch(orderSearchingTextField.getText());
-        consoleBoxSetText(orderInfoStr);
+        String orderSearchTextFieldStr = orderSearchingTextField.getText();
+        if(orderSearchTextFieldStr.equals("")){
+            consoleBoxSetText( errorInfo + "Your student No. is empty!\nPlease enter a correct student No..");
+        }else{
+            orderInfoStr = managerDB.orderSearch(orderSearchTextFieldStr);
+            consoleBoxSetText(orderInfoStr);
+        }
+
     }
 
     /*** dateUpdating ***/
+    /***********************************************************************
+     * dateUpdating() updates an order record into Deliver table
+     * in database by three parameters: order No., Book No. date
+     * Then it passes a string to consoleBoxSetText()
+     **********************************************************************/
     public void dateUpdating(){
         String orderStr, bookNumStr, dateStr;
         orderStr = orderNumUpdatingTextField.getText();
@@ -428,21 +482,28 @@ public class GUI_Core {
         System.out.println("dateStr: " + dateStr);
 
         if(orderStr == null || bookNumStr == null || dateStr == null || orderStr.equals("") || bookNumStr.equals("")|| dateStr.equals("")){
-            consoleBoxSetText("Update failed!\nPlease check the your book No. and Order No. .");
+            consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your book No. and Order No. .");
         }
         else{
             if(managerDB.orderDateUpdate(orderStr, bookNumStr, dateStr)){
 //            JOptionPane.showMessageDialog(null, "Successfully updated!");
+
                 consoleBoxSetText("Successfully updated!");
             }else{
 //            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the your book No. and Order No. .");
-                consoleBoxSetText("Update failed!\nPlease check the your book No. and Order No. .");
+                consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your book No. , order No. or your delivery date.\n" +
+                        "(Delivery date cannot be earlier than the order date.)");
             }
         }
 
     }
 
     /*** orderMaking ***/
+    /***********************************************************************
+     * orderMaking() makes an order record into Place_Order table
+     * in database by three parameters: student No., book No.s, payment methods
+     * Then it passes a string to consoleBoxSetText()
+     **********************************************************************/
     public void orderMaking(){
         String orderConfirmInfoStr = "";
         String stdNumStr, bookNumStr;
@@ -451,7 +512,6 @@ public class GUI_Core {
 
         stdNumStr = stdOrderMakingTextField.getText();
         bookNumStr = bookNumOrderMakingTextField.getText();
-
 
         if(paymentRdBtnCash.isSelected()){
             choice = 1;
@@ -463,19 +523,33 @@ public class GUI_Core {
             choice = 3;
         }
 
-        orderConfirmInfoStr = managerDB.orderMaking(stdNumStr, bookNumStr, choice, cardNumber);
+        if(stdNumStr == null || bookNumStr == null || stdNumStr.equals("") || bookNumStr.equals("")){
+            consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your student No. and book No. .");
+        }
+        else{
+            if(choice == 2 && cardNumber.equals("")){
+                cardNumber = null;
+            }
+            orderConfirmInfoStr = managerDB.orderMaking(stdNumStr, bookNumStr, choice, cardNumber);
+            consoleBoxSetText(orderConfirmInfoStr);
+            getAllBooks();
+            getAllOrders();
+        }
 
-        consoleBoxSetText(orderConfirmInfoStr);
-        getAllBooks();
-        getAllOrders();
     }
 
     /*** orderCancelling ***/
+    /***********************************************************************
+     * orderCancelling() cancels an order record from Place_Order table
+     * in database by a parameters: order No.
+     * Then it passes a string to consoleBoxSetText() and invokes getAllBooks()
+     * and getAllOrders() to refresh book stock and orders information
+     **********************************************************************/
     public void orderCancelling(){
         String orderInfoStr = null;
         orderInfoStr = managerDB.orderCancelling(orderCancelingTextField.getText());
-        if(orderInfoStr == null){
-            consoleBoxSetText("Order cancelling failed.");
+        if(orderInfoStr == null || orderInfoStr.equals("")){
+            consoleBoxSetText( errorInfo + "Please enter a correct order No.!");
         }else{
             consoleBoxSetText(orderInfoStr);
         }
@@ -484,6 +558,10 @@ public class GUI_Core {
     }
 
     /*** Engine run() ***/
+    /***********************************************************************
+     * run() invokes three information display methods: bookStoreRecordInfo(),
+     * getAllBooks() and getAllOrders()
+     **********************************************************************/
     public void run() {
         bookStoreRecordInfo();
         getAllBooks();
@@ -492,6 +570,10 @@ public class GUI_Core {
     }
 
     /*** fire ***/
+    /***********************************************************************
+     * fire() initiates a bookshop object and UI components.
+     * Then it invokes run()
+     **********************************************************************/
     public void fire(){
         /*** GUI - DB ***/
         String myMenuStr, stdIDStr;
@@ -502,7 +584,7 @@ public class GUI_Core {
 
         /*** Invoke bookshop ***/
         managerDB = new bookshop();
-        if (!managerDB.auTologinProxy()) {
+        if (!managerDB.loginProxy()) {
             System.out.println("Login proxy failed, please re-examine your username and password!");
             return;
         }
@@ -536,6 +618,9 @@ public class GUI_Core {
     /*** ------------------------------------------------ ***/
 
     /*** main() ***/
+    /***********************************************************************
+     * main() initiates a GUI_Core object and invokes run()
+     **********************************************************************/
     public static void main(String[] args) {
         // TODO code application logic here
         GUI_Core GUICoreWin = new GUI_Core();
