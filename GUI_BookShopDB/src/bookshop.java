@@ -391,7 +391,10 @@ public class bookshop {
 						String OrderDateTransfer = currentDateFormat.format(orderDate);
 						Date newOrderDate = currentDateFormat.parse(OrderDateTransfer);
 
-						newDeliveryDate = newDeliveryDate + " 00:00:00.0";
+						String rightNowDate = getCurrentDate();
+						rightNowDate = rightNowDate.substring(10, 19);
+
+						newDeliveryDate = newDeliveryDate + rightNowDate;
 						Date currentNewDeliveryDate = currentDateFormat.parse(newDeliveryDate);
 
 						if(newOrderDate.compareTo(currentNewDeliveryDate) > 0){
