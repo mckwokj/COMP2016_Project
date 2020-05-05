@@ -492,7 +492,7 @@ public class GUI_Core {
             }else{
 //            JOptionPane.showMessageDialog(null, "Update failed!\nPlease check the your book No. and Order No. .");
                 consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your book No. , order No. or your delivery date.\n" +
-                        "(Delivery date cannot be earlier than the order date.)");
+                        "(Delivery date cannot be earlier than the order date.)\n");
             }
         }
 
@@ -524,7 +524,9 @@ public class GUI_Core {
         }
 
         if(stdNumStr == null || bookNumStr == null || stdNumStr.equals("") || bookNumStr.equals("")){
-            consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your student No. and book No. .");
+            consoleBoxSetText( errorInfo + "Update failed!\nPlease check the your student No. and book No. \n(Please" +
+                    " (check if you have orders which delivery date is in the future as well.)\n" +
+                    "You cannot make new orders if you have undelivered order.).");
         }
         else{
             if(choice == 2 && cardNumber.equals("")){

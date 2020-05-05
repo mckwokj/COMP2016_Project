@@ -54,6 +54,8 @@ public class bookshop {
 
 	boolean exitFlag = false;
 
+	final String errorInfo = "Exception:\n---------------------------\n---------------------------\n";
+
 	/*** bookshop ***/
 	/***********************************************************************
 	 * bookshop() is the constructor and prints hello information
@@ -259,7 +261,7 @@ public class bookshop {
 				System.out.println("MESSAGE: " + e1.getMessage());
 				System.out.println();
 				e1 = e1.getNextException();
-				return "Order failed. Your card No. is missing or in a wrong format!\nPlease enter a correct card number.";
+				return errorInfo + "Order failed. Your card No. is missing or in a wrong format!\nPlease enter a correct card number.";
 			}
 			while (e1 != null);
 
@@ -310,7 +312,7 @@ public class bookshop {
 		if (checkOrderDelivered(order_no) == false) {
 			System.out.println("Order cancelling failed!");
 			System.out.println("Some book of this order had been delivered!");
-			orderCancellingInfoStr = "Order cancelling failed!\n" + "Some book of this order had been delivered!\n";
+			orderCancellingInfoStr = errorInfo + "Order cancelling failed!\n" + "Some book of this order had been delivered!\n";
 			return orderCancellingInfoStr;
 		}
 
@@ -318,7 +320,7 @@ public class bookshop {
 		if (checkOrderDateWithin7(order_no) == false) {
 			System.out.println("Order cancelling failed!");
 			System.out.println("Order made before 7 days!");
-			orderCancellingInfoStr = "Order cancelling failed!\n" + "Order made before 7 days!\n";
+			orderCancellingInfoStr = errorInfo + "Order cancelling failed!\n" + "Order made before 7 days!\n";
 			return orderCancellingInfoStr;
 		}
 
@@ -328,7 +330,7 @@ public class bookshop {
 		/** check student NO.'s validation **/
 		if(snum == null){
 			System.out.println("Get student ID error! We cannot update the discount level.");
-			orderCancellingInfoStr = "Get student ID error! We cannot update the discount level.";
+			orderCancellingInfoStr = errorInfo + "Get student ID error! We cannot update the discount level.";
 			return orderCancellingInfoStr;
 		}
 
@@ -559,7 +561,7 @@ public class bookshop {
 							orderStr += heads2[i] + " : " + value + "\n";
 						}else if(heads2[i].contains("Price")){
 
-							double calculateDiscount = singleBookDiscount(orderNum); /** !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! **/
+							double calculateDiscount = singleBookDiscount(orderNum); /** ! **/
 
 							System.out.println(heads2[i] + " : " + (calculateDiscount*Double.parseDouble(value)));
 							orderStr += heads2[i] + " : " + (calculateDiscount * Double.parseDouble(value)) + "\n";
@@ -693,10 +695,17 @@ public class bookshop {
 	 * Return: true if update successfully, false if the updating is failed
 	 **********************************************************************/
 	public boolean updateDeliveryDate(String order_no, String Bnum, String date) {
+
+		String myDate = null;
+		String rightNowDate = getCurrentDate();
+		myDate = date.substring(0,10) + rightNowDate.substring(10, 19);
+
+		System.out.println("myDate: " + myDate);
+
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "UPDATE DELIVER" +
-					" SET DELIVERY_DATE =" + "TO_DATE('" + date + "', 'dd/mm/yyyy') "+
+					" SET DELIVERY_DATE =" + "TO_DATE('" + myDate + "', 'dd/mm/yyyy:hh24/mi/ss') " +
 					" WHERE ORDER_NO = '" + order_no.toUpperCase() + "'"+
 					" AND BNUM = '" + Bnum.toUpperCase() +"'";
 			System.out.println("Updated successfully!");
@@ -763,9 +772,9 @@ public class bookshop {
 				try {
 					String value = rs.getString(1);
 					if (value == null) { /** When the value is null, it means delivery_date has not set yet **/
-						System.out.println("Books ordered earlier hadn't been delivered!");
+						System.out.println("Books ordered earlier/later hadn't been delivered!");
 						System.out.println("New order making failed!");
-						checkOrderStr = "Books ordered earlier hadn't been delivered!\n";
+						checkOrderStr = errorInfo + "Books ordered earlier/later hadn't been delivered!\n(Check if you have orders that will be delivered in the next coming days.)\n";
 						checkOrderStr += "New order making failed!\n";
 						rs.close();
 						stm.close();
@@ -784,10 +793,10 @@ public class bookshop {
 							Date currentDate = currentDateFormat.parse(getCurrentDate());
 
 							if(newDeliveryDate.compareTo(currentDate) > 0){
-								System.out.println("Books ordered earlier hadn't been delivered!");
+								System.out.println("Books ordered earlier hadn't been delivered!\n(check if you have orders which delivery date is in the next coming days as well.)\n");
 								System.out.println("New order making failed!");
 
-								checkOrderStr = "Books ordered earlier hadn't been delivered!\n";
+								checkOrderStr = errorInfo + "Books ordered earlier hadn't been delivered!\n(check if you have orders which delivery date is in the next coming days as well.)\n";
 								checkOrderStr += "New order making failed!\n";
 								rs.close();
 								stm.close();
@@ -816,8 +825,8 @@ public class bookshop {
 	 **********************************************************************/
 	public String printBookList() {
 		String bookListStr = "";
-		System.out.println("The book inside bookshop are:");
-		bookListStr += "The book inside bookshop are:";
+		System.out.println("Book Stock:");
+		bookListStr += "Book Stock:";
 		try {
 			Statement stm = conn.createStatement();
 			String sql = "SELECT * FROM BOOK";
@@ -864,7 +873,7 @@ public class bookshop {
 			ResultSet rs = stm.executeQuery(sql);
 			if(!rs.next()) {
 				System.out.println("Book: " + Bnum + " not found!");
-				bookAmountStr = "Book: " + Bnum + " not found!\n";
+				bookAmountStr = errorInfo + "Book: " + Bnum + " not found!\n";
 				rs.close();
 				stm.close();
 				return bookAmountStr;
@@ -874,7 +883,7 @@ public class bookshop {
 					String value = rs.getString(1);
 					if (Integer.parseInt(value) == 0) {
 						System.out.println("Books: " + Bnum + " out of stocks!");
-						bookAmountStr = "Books: " + Bnum + " out of stocks!\n";
+						bookAmountStr = errorInfo + "Books: " + Bnum + " out of stocks!\n";
 						rs.close();
 						stm.close();
 						return bookAmountStr;
